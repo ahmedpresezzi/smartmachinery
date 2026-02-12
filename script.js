@@ -2822,9 +2822,10 @@ function associateExcelToBox(boxId, onSuccessCallback = null) {
             <span class="excel-file-item-name">${fileName}</span>
         `;
 
-        fileItem.addEventListener('click', () => {
+        fileItem.addEventListener('click', async () => {
             box.excelFile = fileName;
             renderBoxes();
+            await syncBoxesWithBackend();
             modal.style.display = 'none';
             // Optional success message
             const successMsg = document.createElement('div');
