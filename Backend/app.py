@@ -26,8 +26,10 @@ if not WEBHOOK_PERMS:
     print("⚠️ WARNING: WEBHOOK_PERMS is missing!")
 
 # Memoria per richieste permessi temporanee
-# { username: { status: 'pending'|'accepted'|'rejected', role: 'admin', expires: timestamp } }
 PERMISSION_REQUESTS = {}
+
+# WebSocket Connections for Real-Time Updates
+WS_CLIENTS = set()
 
 # Risoluzione percorsi assoluta
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -148,30 +150,36 @@ def load_state():
 def save_state(state):
     with open(STATE_FILE, 'w') as f: json.dump(state, f, indent=4)
 
-@web.middleware
-async def cors_middleware(request, handler):
-    # Handle preflight OPTIONS requests
-    if request.method == 'OPTIONS':
-        return web.Response(status=204, headers={
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-            'Access-Control-Max-Age': '86400',
-        })
+async def broadcast(data):
+    """Send real-time updates to all connected browser clients."""
+    if not WS_CLIENTS: return
+    disconnected = set()
+    for ws in WS_CLIENTS:
+        try:
+            await ws.send_json(data)
+        except:
+            disconnected.add(ws)
+    for ws in disconnected:
+        WS_CLIENTS.discard(ws)
+
+async def handle_ws(request):
+    ws = web.WebSocketResponse()
+    await ws.prepare(request)
     
-    # Handle the actual request
+    WS_CLIENTS.add(ws)
+    # print(f"New WebSocket connection. Total: {len(WS_CLIENTS)}")
+    
     try:
-        response = await handler(request)
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-        return response
-    except web.HTTPException as ex:
-        ex.headers['Access-Control-Allow-Origin'] = '*'
-        raise ex
-    except Exception as e:
-        print(f"Middleware Error: {e}")
-        raise
+        async for msg in ws:
+            if msg.type == web.WSMsgType.TEXT:
+                if msg.data == 'close':
+                    await ws.close()
+            elif msg.type == web.WSMsgType.ERROR:
+                print(f'WS Connection closed with exception {ws.exception()}')
+    finally:
+        WS_CLIENTS.discard(ws)
+        # print(f"WebSocket closed. Total: {len(WS_CLIENTS)}")
+    return ws
 
 async def handle_get_assets(request):
     return web.json_response(load_assets())
@@ -180,6 +188,7 @@ async def handle_save_assets(request):
     try:
         data = await request.json()
         save_assets(data)
+        await broadcast({'type': 'assets_updated'})
         return web.json_response({'success': True})
     except Exception as e:
         return web.json_response({'success': False, 'message': str(e)}, status=500)
@@ -315,7 +324,8 @@ async def handle_admin_handle_request(request):
         elif action == 'reject':
             PERMISSION_REQUESTS[u] = {'status': 'rejected'}
             await log_event("warning", f"Admin WEB: Richiesta di {u} rifiutata")
-            
+        
+        await broadcast({'type': 'users_updated'})
         return web.json_response({'success': True})
     except Exception as e:
         return web.json_response({'success': False, 'message': str(e)}, status=500)
@@ -440,6 +450,7 @@ async def start_webserver():
     app.router.add_get('/api/admin/users', handle_admin_get_users)
     app.router.add_post('/api/admin/update-user', handle_admin_update_user)
     app.router.add_post('/api/admin/delete-user', handle_admin_delete_user)
+    app.router.add_get('/ws', handle_ws)
     app.router.add_get('/', handle_index)
     
     # Static files (CSS, JS, Logos) are in the root

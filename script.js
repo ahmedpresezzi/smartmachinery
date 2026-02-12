@@ -62,6 +62,48 @@ const BACKEND_BASE = (window.location.hostname === 'localhost' || window.locatio
 console.log("[DEBUG] Backend Base:", BACKEND_BASE);
 const BACKEND_API_URL = `${BACKEND_BASE}/api/chat`;
 
+// --- WebSocket Real-Time Sync ---
+let socket = null;
+function initWebSocket() {
+    if (!BACKEND_BASE) return;
+
+    // Resolve WS protocol
+    let wsUrl = BACKEND_BASE.replace('http', 'ws');
+    if (wsUrl === '') wsUrl = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host;
+
+    console.log("[WS] Connecting to:", wsUrl + '/ws');
+    socket = new WebSocket(wsUrl + '/ws');
+
+    socket.onmessage = async (event) => {
+        const data = JSON.parse(event.data);
+        console.log("[WS] Message received:", data);
+
+        if (data.type === 'assets_updated') {
+            console.log("[WS] Refreshing assets...");
+            await loadBoxesFromBackend();
+            if (typeof renderBoxes === 'function') renderBoxes();
+        }
+
+        if (data.type === 'users_updated') {
+            console.log("[WS] Refreshing users...");
+            if (typeof loadAdminUsers === 'function') loadAdminUsers();
+            if (typeof loadAdminRequests === 'function') loadAdminRequests();
+        }
+    };
+
+    socket.onclose = (e) => {
+        console.log('[WS] Socket is closed. Reconnect will be attempted in 5 seconds.', e.reason);
+        setTimeout(initWebSocket, 5000);
+    };
+
+    socket.onerror = (err) => {
+        console.error('[WS] Socket encountered error: ', err.message, 'Closing socket');
+        socket.close();
+    };
+}
+// Initialize WS
+initWebSocket();
+
 // --- GLOBAL ADMIN FUNCTIONS (Defined early to avoid "is not a function" errors) ---
 let adminPollInterval = null;
 
