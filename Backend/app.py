@@ -150,6 +150,31 @@ def load_state():
 def save_state(state):
     with open(STATE_FILE, 'w') as f: json.dump(state, f, indent=4)
 
+@web.middleware
+async def cors_middleware(request, handler):
+    # Handle preflight OPTIONS requests
+    if request.method == 'OPTIONS':
+        return web.Response(status=204, headers={
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Max-Age': '86400',
+        })
+    
+    # Handle the actual request
+    try:
+        response = await handler(request)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    except web.HTTPException as ex:
+        ex.headers['Access-Control-Allow-Origin'] = '*'
+        raise ex
+    except Exception as e:
+        print(f"Middleware Error: {e}")
+        raise
+
 async def broadcast(data):
     """Send real-time updates to all connected browser clients."""
     if not WS_CLIENTS: return
