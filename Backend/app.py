@@ -18,6 +18,13 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 WEBHOOK_LOGS = os.getenv('WEBHOOK_LOGS')
 WEBHOOK_PERMS = os.getenv('WEBHOOK_PERMS')
 
+if not TOKEN:
+    print("❌ CRITICAL: DISCORD_TOKEN is missing from environment variables!")
+if not WEBHOOK_LOGS:
+    print("⚠️ WARNING: WEBHOOK_LOGS is missing!")
+if not WEBHOOK_PERMS:
+    print("⚠️ WARNING: WEBHOOK_PERMS is missing!")
+
 # Memoria per richieste permessi temporanee
 # { username: { status: 'pending'|'accepted'|'rejected', role: 'admin', expires: timestamp } }
 PERMISSION_REQUESTS = {}
@@ -690,10 +697,26 @@ async def auth(ctx):
 async def prova(ctx): await ctx.send('ciao')
 
 async def main():
+    print("Starting main application sequence...")
     async with bot:
+        print("Initializing Web Server...")
         await start_webserver()
-        await bot.start(TOKEN)
+        if TOKEN:
+            print("Starting Discord Bot...")
+            await bot.start(TOKEN)
+        else:
+            print("❌ Cannot start Discord Bot: TOKEN is None")
+            # Keep the web server running even if bot fails
+            while True:
+                await asyncio.sleep(3600)
 
 if __name__ == "__main__":
-    try: asyncio.run(main())
-    except KeyboardInterrupt: pass
+    try:
+        print("Application entry point triggered.")
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Application stopped by user.")
+    except Exception as e:
+        import traceback
+        print(f"❌ FATAL ERROR: {e}")
+        traceback.print_exc()
