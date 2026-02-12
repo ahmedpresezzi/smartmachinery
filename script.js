@@ -1807,7 +1807,38 @@ async function runBSWConfigWizard(item, silent = false) {
                 "breakers": [],
                 "datapoint": datapoint
             });
+
+            // Extract distinct params for rawDataParams if applicable
+            // Usually rawDataParams contains settings/recipes etc.
+            // If profile has them distinguished, we could use that.
+            // For now, let's assume we want to put EVERYTHING in rawDataParams IF it's not high freq,
+            // OR if we want a specific subset. 
+            // The template shows rawDataParams having param_0, param_1 etc.
+            // We'll populate rawDataParams with the SAME list as rawDataFreq for now to ensure it's not empty,
+            // or better, if the user had specific profile logic.
+            // Given the user wants "nulla all'interno", likely he wants the PARAMS inside rawDataParams.
         });
+
+        // 6b. Prepare Global Params from the first profile found (or aggregation)
+        let globalParamsDatapoints = [];
+        if (plcConfigsInfo.length > 0 && plcConfigsInfo[0].profile && plcConfigsInfo[0].profile.paramProfile) {
+            // Filter or map params for rawDataParams
+            // Assuming we use the same list for now, or filter by some logic if available
+            // Just mapping all 'double' params or similar
+            globalParamsDatapoints = plcConfigsInfo[0].profile.paramProfile.map((p, i) => {
+                let type = "double";
+                const pType = String(p.type).toUpperCase();
+                if (pType.includes("STRING")) type = "string";
+                if (pType.includes("BOOL")) type = "bool";
+
+                return {
+                    "name": `param_${i}`,
+                    "type": type,
+                    "input_data": { "var": p.name || p.tagId },
+                    "used_func": "doNothing"
+                };
+            });
+        }
 
         // Add Standard Static Aspects (Dynamic but standard structure)
         bswConfig.aspects.push(
@@ -1816,7 +1847,7 @@ async function runBSWConfigWizard(item, silent = false) {
             { "input_id": 1, "name": "historyCycle", "mapping_file": null, "first_write": false, "update": "never", "breakers": [], "datapoint": [] },
             { "input_id": 1, "name": "historyParams", "mapping_file": null, "first_write": false, "update": { "write_if_up": { "update_kind": 0, "bool_name": "activeParams.paramsResume" } }, "breakers": [], "datapoint": [] },
             { "input_id": 1, "name": "activeParams", "mapping_file": null, "first_write": true, "update": "on_var", "breakers": [], "datapoint": [] },
-            { "input_id": 1, "name": "rawDataParams", "mapping_file": null, "first_write": true, "update": "never", "breakers": [], "datapoint": [] },
+            { "input_id": 1, "name": "rawDataParams", "mapping_file": null, "first_write": true, "update": "never", "breakers": [], "datapoint": globalParamsDatapoints },
             { "input_id": 1, "name": "activeAlarms", "mapping_file": null, "first_write": true, "update": "on_var", "breakers": [], "datapoint": [{ "name": "alarmsResume", "type": "bool", "input_data": {}, "used_func": "activeAlarmEdge" }] },
             { "input_id": 1, "name": "historyAlarm", "mapping_file": null, "first_write": false, "update": { "write_if_up": { "update_kind": 0, "bool_name": "activeAlarms.alarmsResume" } }, "breakers": [], "datapoint": [] }
         );
