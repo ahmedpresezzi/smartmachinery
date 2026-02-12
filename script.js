@@ -1550,37 +1550,53 @@ async function runBSWConfigWizard(item, silent = false) {
     try {
         // 1. Gather all PLC Configs and their Profiles
         let plcConfigsInfo = [];
+        // DEBUG: Create a debug log array
+        let debugLog = [];
+        debugLog.push(`--- BSW Gen Start: ${new Date().toISOString()} ---`);
+
         function traverse(node, parentNode) {
             if (node.type === 'file' && node.name === 'config.json' && node.id !== item.id) {
+                debugLog.push(`Found config.json: ${node.name} (Parent: ${parentNode ? parentNode.name : 'ROOT'})`);
                 if (node.content && node.content !== '{}') {
                     try {
                         const c = JSON.parse(node.content);
+                        debugLog.push(`Parsed Config. ID: ${c.configId}, Devices: ${c.devices ? c.devices.length : 0}`);
                         if (c.devices && c.devices.length > 0) {
                             // Find corresponding profile
                             const profileId = c.devices[0].profileId || 'profile';
                             const profileName = profileId + '.json';
                             let profile = null;
+                            debugLog.push(`Looking for Profile: ${profileName} (derived from profileId: ${profileId})`);
 
                             let searchScope = (parentNode && parentNode.children) ? parentNode.children : box.content;
+                            debugLog.push(`Search Scope Files: ${searchScope.map(n => n.name).join(', ')}`);
 
                             // Case-insensitive search
                             const profileNode = searchScope.find(child => child.name.toLowerCase() === profileName.toLowerCase());
 
                             if (profileNode && profileNode.content) {
+                                debugLog.push(`Profile Found: ${profileNode.name}`);
                                 try {
                                     profile = JSON.parse(profileNode.content);
+                                    const pCount = profile.paramProfile ? profile.paramProfile.length : 0;
+                                    debugLog.push(`Profile Parsed. paramsProfile len: ${pCount}`);
                                     addSystemLog('info', `BSW: Profilo ${profileNode.name} trovato (${profile.paramProfile ? profile.paramProfile.length : 0} params)`);
                                 } catch (e) {
+                                    debugLog.push(`ERROR Parsing Profile: ${e.message}`);
                                     console.warn("Invalid profile content:", profileName);
                                     addSystemLog('warning', `BSW: Profilo ${profileName} invalido (Parse Error)`);
                                 }
                             } else {
+                                debugLog.push(`Profile NOT FOUND in scope.`);
                                 addSystemLog('warning', `BSW: Profilo ${profileName} mancante! (Cercato in ${searchScope.length} files)`);
                             }
 
 
                             // Check for placeholders
+                            const pollingTime = c.devices[0].pollingTime;
+                            debugLog.push(`Polling Time: ${pollingTime}`);
                             if (String(c.devices[0].pollingTime).includes("FREQUENZA") || String(c.devices[0].name).includes("NOME")) {
+                                debugLog.push(`ABORT: Placeholder detected.`);
                                 showInternalAlert("Configurazione PLC incompleta (trovati valori default). Esegui prima la Configurazione Guidata PLC (tasto destro -> Configura PLC).");
                                 addSystemLog('error', `BSW: Configurazione incompleta. Generazione interrotta.`);
                                 return;
@@ -1588,12 +1604,21 @@ async function runBSWConfigWizard(item, silent = false) {
 
                             plcConfigsInfo.push({ config: c, profile: profile });
                         }
-                    } catch (e) { console.warn("Skipping invalid config:", node.id); }
+                    } catch (e) { console.warn("Skipping invalid config:", node.id); debugLog.push(`JSON Parse Error on Config: ${e.message}`); }
                 }
             }
             if (node.children) node.children.forEach(child => traverse(child, node));
         }
         box.content.forEach(n => traverse(n, null));
+
+        // Write Debug File
+        const debugFile = {
+            id: 'debug_' + Date.now(),
+            name: 'BSW_DEBUG.txt',
+            type: 'file',
+            content: debugLog.join('\n')
+        };
+        box.content.push(debugFile);
 
         if (plcConfigsInfo.length === 0) {
             if (!silent) showInternalAlert("Attenzione: Nessuna configurazione PLC trovata.");
