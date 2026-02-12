@@ -1918,17 +1918,25 @@ async function runBSWConfigWizard(item, silent = false) {
         // 3. Build Inputs
         plcConfigs.forEach((plcConfig, idx) => {
             const device = plcConfig.devices[0];
-            const cleanName = device.name.replace(/ms$/, '');
+
+            // Use factoryEdgeId if available (standard), otherwise fall back to device name (legacy)
+            // If checking legacy device.name, we stripped 'ms'. FactoryEdgeId usually includes likely what is needed or consistent logic.
+            // If factoryEdgeId is e.g. "factoryedge-rockwell-500ms", we use it as is for channel suffix.
+            let channelSuffix = plcConfig.factoryEdgeId;
+            if (!channelSuffix) {
+                channelSuffix = device.name.replace(/ms$/, '');
+            }
+
             bswConfig.input_info.push({
                 "input_id": idx + 1,
                 "redis": {
                     "hostname": "redis",
                     "port": 6379,
-                    "channelData": `data-${cleanName}`,
+                    "channelData": `data-${channelSuffix}`,
                     "username": null,
                     "password": null,
                     "db": 0,
-                    "keyStatus": `status-${cleanName}`,
+                    "keyStatus": `status-${channelSuffix}`,
                     "sleeping_time": 0.1,
                     "output_status": { "kind": "print", "topic": null, "hostname": null, "port": null, "username": null, "password": null }
                 }
@@ -2399,7 +2407,7 @@ function runProfileWizard(item) {
     continueProfileWizard(item, box, frequency);
 }
 
-function continueProfileWizard(item, box, frequency) {
+async function continueProfileWizard(item, box, frequency) {
     if (!box.excelFile || !excelFiles[box.excelFile]) {
         showInternalAlert(t('script.errorNoExcel'));
         return;
@@ -2642,6 +2650,7 @@ function continueProfileWizard(item, box, frequency) {
     showInternalAlert(`Generato profilo ${isSiemens ? 'Siemens' : 'Rockwell'} (${freqInt}ms) da ${sheetNames} con ${params.length} parametri.`);
     renderExplorer();
     checkFinalAutomation(box);
+    await syncBoxesWithBackend();
 }
 
 function bindFileManagerEvents() {
