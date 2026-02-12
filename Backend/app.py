@@ -167,6 +167,23 @@ async def restore_from_discord():
     except Exception as e:
         print(f"❌ Restore Error: {e}")
 
+async def delete_backup_from_discord(filename):
+    """Deletes the backup message from Discord for the given filename."""
+    if not bot.is_ready() or not BACKUP_CHANNEL_ID: return
+    try:
+        channel = bot.get_channel(int(BACKUP_CHANNEL_ID))
+        if not channel: return
+        
+        async for message in channel.history(limit=200):
+            if message.author == bot.user and message.attachments:
+                for att in message.attachments:
+                    if att.filename == filename:
+                        await message.delete()
+                        print(f"🔥 Discord Backup eliminato: {filename}")
+                        break
+    except Exception as e:
+        print(f"❌ Errore eliminazione backup Discord {filename}: {e}")
+
 async def log_event(event_type, message):
     logs = []
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -310,6 +327,10 @@ async def handle_delete_excel(request):
         if os.path.exists(file_path):
             os.remove(file_path)
             print(f"🗑️ File eliminato: {filename}")
+            
+            # Remove from Discord Persistence
+            asyncio.create_task(delete_backup_from_discord(filename))
+            
             # Broadcast update
             await broadcast({'type': 'excels_updated'})
             return web.json_response({'success': True})
