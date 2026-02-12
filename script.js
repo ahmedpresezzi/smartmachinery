@@ -82,17 +82,28 @@ function initWebSocket() {
             console.log("[WS] Refreshing assets...");
             await loadBoxesFromBackend();
             if (typeof renderBoxes === 'function') renderBoxes();
+
+            // IF Explorer is open for a specific box, refresh it
+            if (currentFileManagerBoxId && typeof renderExplorer === 'function') {
+                console.log("[WS] Refreshing Explorer for box:", currentFileManagerBoxId);
+                renderExplorer();
+            }
+            addSystemLog('info', '📦 Sincronizzazione Asset completata (Tempo Reale)');
         }
 
         if (data.type === 'users_updated') {
             console.log("[WS] Refreshing users...");
             if (typeof loadAdminUsers === 'function') loadAdminUsers();
             if (typeof loadAdminRequests === 'function') loadAdminRequests();
+            addSystemLog('info', '👥 Licenze aggiornate (Tempo Reale)');
         }
 
         if (data.type === 'excels_updated') {
             console.log("[WS] Refreshing excels...");
-            if (typeof loadExcelsFromBackend === 'function') await loadExcelsFromBackend();
+            if (typeof loadExcelsFromBackend === 'function') {
+                await loadExcelsFromBackend();
+                addSystemLog('info', '📊 Storage Excel aggiornato (Tempo Reale)');
+            }
         }
     };
 
@@ -311,13 +322,22 @@ async function loadExcelsFromBackend() {
         const fileNames = await response.json();
 
         for (const fileName of fileNames) {
+            // Se il file è già presente saltiamo per velocità (tempo reale)
+            if (excelFiles[fileName]) continue;
+
             console.log(`[STORAGE] Recupero file: ${fileName}`);
-            const fileRes = await fetch(`${BACKEND_BASE}/api/excel/${fileName}`);
-            const blob = await fileRes.blob();
-            const file = new File([blob], fileName);
-            await handleExcelFile(file, false); // false = don't re-upload
+            try {
+                const fileRes = await fetch(`${BACKEND_BASE}/api/excel/${fileName}`);
+                const blob = await fileRes.blob();
+                const file = new File([blob], fileName);
+                await handleExcelFile(file, false); // false = don't re-upload
+            } catch (err) {
+                console.error(`[STORAGE] Errore recupero ${fileName}:`, err);
+            }
         }
-        console.log(`[STORAGE] ${fileNames.length} file excel caricati.`);
+        // Forza aggiornamento UI
+        if (typeof updateFilesList === 'function') updateFilesList();
+        console.log(`[STORAGE] Sincronizzazione completata.`);
     } catch (error) {
         console.error("[STORAGE] Errore caricamento excel:", error);
     }

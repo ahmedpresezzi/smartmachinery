@@ -216,6 +216,11 @@ async def cors_middleware(request, handler):
     # Handle the actual request
     try:
         response = await handler(request)
+        
+        # WebSockets handle their own headers during handshake
+        if isinstance(response, web.WebSocketResponse):
+            return response
+            
         response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
@@ -244,7 +249,7 @@ async def handle_ws(request):
     await ws.prepare(request)
     
     WS_CLIENTS.add(ws)
-    # print(f"New WebSocket connection. Total: {len(WS_CLIENTS)}")
+    print(f"🔌 [WS] Nuova connessione. Totale client: {len(WS_CLIENTS)}")
     
     try:
         async for msg in ws:
@@ -252,10 +257,10 @@ async def handle_ws(request):
                 if msg.data == 'close':
                     await ws.close()
             elif msg.type == web.WSMsgType.ERROR:
-                print(f'WS Connection closed with exception {ws.exception()}')
+                print(f'❌ [WS] Errore connessione: {ws.exception()}')
     finally:
         WS_CLIENTS.discard(ws)
-        # print(f"WebSocket closed. Total: {len(WS_CLIENTS)}")
+        print(f"🔌 [WS] Connessione chiusa. Client rimasti: {len(WS_CLIENTS)}")
     return ws
 
 async def handle_get_assets(request):
