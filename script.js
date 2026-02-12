@@ -1548,22 +1548,38 @@ async function runBSWConfigWizard(item, silent = false) {
     // Use machine database code and default password
     const userPassword = "fCLgYTRSJHF4LjGedrHcl85x6";
     try {
-        // 1. Gather all PLC Configs
-        let plcConfigs = [];
-        function traverse(node) {
+        // 1. Gather all PLC Configs and their Profiles
+        let plcConfigsInfo = [];
+        function traverse(node, parentNode) {
             if (node.type === 'file' && node.name === 'config.json' && node.id !== item.id) {
                 if (node.content && node.content !== '{}') {
                     try {
                         const c = JSON.parse(node.content);
-                        if (c.devices && c.devices.length > 0) plcConfigs.push(c);
+                        if (c.devices && c.devices.length > 0) {
+                            // Find corresponding profile
+                            const profileId = c.devices[0].profileId || 'profile';
+                            const profileName = profileId + '.json';
+                            let profile = null;
+                            if (parentNode && parentNode.children) {
+                                const profileNode = parentNode.children.find(child => child.name === profileName);
+                                if (profileNode && profileNode.content) {
+                                    try {
+                                        profile = JSON.parse(profileNode.content);
+                                    } catch (e) {
+                                        console.warn("Invalid profile content:", profileName);
+                                    }
+                                }
+                            }
+                            plcConfigsInfo.push({ config: c, profile: profile });
+                        }
                     } catch (e) { console.warn("Skipping invalid config:", node.id); }
                 }
             }
-            if (node.children) node.children.forEach(traverse);
+            if (node.children) node.children.forEach(child => traverse(child, node));
         }
-        box.content.forEach(traverse);
+        box.content.forEach(n => traverse(n, null));
 
-        if (plcConfigs.length === 0) {
+        if (plcConfigsInfo.length === 0) {
             if (!silent) showInternalAlert("Attenzione: Nessuna configurazione PLC trovata.");
             return;
         }
@@ -1573,12 +1589,11 @@ async function runBSWConfigWizard(item, silent = false) {
         bswConfig.input_info = [];
 
         // 3. Build Inputs
-        plcConfigs.forEach((plcConfig, idx) => {
+        plcConfigsInfo.forEach((info, idx) => {
+            const plcConfig = info.config;
             const device = plcConfig.devices[0];
 
             // Use factoryEdgeId if available (standard), otherwise fall back to device name (legacy)
-            // If checking legacy device.name, we stripped 'ms'. FactoryEdgeId usually includes likely what is needed or consistent logic.
-            // If factoryEdgeId is e.g. "factoryedge-rockwell-500ms", we use it as is for channel suffix.
             let channelSuffix = plcConfig.factoryEdgeId;
             if (!channelSuffix) {
                 channelSuffix = device.name.replace(/ms$/, '');
@@ -1602,7 +1617,8 @@ async function runBSWConfigWizard(item, silent = false) {
 
         // 4. Build Outputs
         const uniqueFrequencies = new Set();
-        plcConfigs.forEach(c => {
+        plcConfigsInfo.forEach(info => {
+            const c = info.config;
             if (c.devices && c.devices[0]) {
                 const d = c.devices[0];
                 let freq = String(d.pollingTime);
@@ -1736,8 +1752,11 @@ async function runBSWConfigWizard(item, silent = false) {
             { "input_id": 1, "name": "utils", "mapping_file": null, "first_write": false, "update": "never", "breakers": [], "datapoint": [] }
         ];
 
-        plcConfigs.forEach((plcConfig, idx) => {
+        plcConfigsInfo.forEach((info, idx) => {
+            const plcConfig = info.config;
+            const profile = info.profile;
             const inputId = idx + 1;
+
             if (!plcConfig.devices || !plcConfig.devices[0]) return;
             const device = plcConfig.devices[0];
             let freq = String(device.pollingTime || '').trim().replace(/ms/i, '');
@@ -1751,6 +1770,25 @@ async function runBSWConfigWizard(item, silent = false) {
             const isHighFreq = (freq === '50' || freq === '20');
             const updateTime = isHighFreq ? 0 : (parseInt(freq) / 1000.0);
 
+            // Build datapoint array from profile
+            let datapoint = [];
+            if (!isHighFreq && profile && profile.paramProfile) {
+                datapoint = profile.paramProfile.map((p, i) => {
+                    // Type mapping
+                    let type = "double";
+                    const pType = String(p.type).toUpperCase();
+                    if (pType.includes("STRING")) type = "string";
+                    if (pType.includes("BOOL")) type = "bool";
+
+                    return {
+                        "name": `var_${i}`,
+                        "type": type,
+                        "input_data": { "var": p.name || p.tagId },
+                        "used_func": "doNothing"
+                    };
+                });
+            }
+
             bswConfig.aspects.push({
                 "input_id": inputId,
                 "name": `rawData${freq}`,
@@ -1759,7 +1797,7 @@ async function runBSWConfigWizard(item, silent = false) {
                 "update": updateTime,
                 "bulk": isHighFreq,
                 "breakers": [],
-                "datapoint": []
+                "datapoint": datapoint
             });
         });
 
