@@ -207,16 +207,16 @@ async def handle_login(request):
                 elif "Safari" in ua_string: browser_info = "Safari"
 
                 await log_event("info", f"Login effettuato: {u} | {browser_info} - {os_info}")
-                return web.json_response({'success': True, 'role': user['role']}, headers=get_cors_headers())
-            return web.json_response({'success': False, 'message': 'Account sospeso'}, headers=get_cors_headers())
-        return web.json_response({'success': False, 'message': 'Credenziali errate'}, headers=get_cors_headers())
-    except: return web.json_response({'success': False}, status=500, headers=get_cors_headers())
+                return web.json_response({'success': True, 'role': user['role']})
+            return web.json_response({'success': False, 'message': 'Account sospeso'})
+        return web.json_response({'success': False, 'message': 'Credenziali errate'})
+    except: return web.json_response({'success': False}, status=500)
 
 async def handle_get_logs(request):
     logs = []
     if os.path.exists(AUDIT_FILE):
         with open(AUDIT_FILE, 'r') as f: logs = json.load(f)
-    return web.json_response(logs, headers=get_cors_headers())
+    return web.json_response(logs)
 
 async def handle_chat(request):
     try:
@@ -228,8 +228,8 @@ async def handle_chat(request):
         async with aiohttp.ClientSession() as session:
             async with session.post(OPENROUTER_URL, headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"}, json={"model": OPENROUTER_MODEL, "messages": messages}) as resp:
                 res = await resp.json()
-                return web.json_response({"reply": res['choices'][0]['message']['content']}, headers=get_cors_headers())
-    except Exception as e: return web.json_response({"error": str(e)}, status=500, headers=get_cors_headers())
+                return web.json_response({"reply": res['choices'][0]['message']['content']})
+    except Exception as e: return web.json_response({"error": str(e)}, status=500)
 
 async def handle_request_perms(request):
     try:
@@ -255,14 +255,14 @@ async def handle_request_perms(request):
         async with aiohttp.ClientSession() as session:
             await session.post(WEBHOOK_PERMS, json={"embeds": [embed]})
             
-        return web.json_response({'success': True}, headers=get_cors_headers())
+        return web.json_response({'success': True})
     except Exception as e:
-        return web.json_response({'success': False, 'message': str(e)}, status=500, headers=get_cors_headers())
+        return web.json_response({'success': False, 'message': str(e)}, status=500)
 
 async def handle_check_status(request):
     u = request.query.get('username')
     if not u or u not in PERMISSION_REQUESTS:
-        return web.json_response({'status': 'none'}, headers=get_cors_headers())
+        return web.json_response({'status': 'none'})
     
     status_data = PERMISSION_REQUESTS[u]
     # Se accettato, controlla scadenza
@@ -270,13 +270,13 @@ async def handle_check_status(request):
         if datetime.now().timestamp() > status_data.get('expires', 0):
             status_data['status'] = 'expired'
             PERMISSION_REQUESTS.pop(u, None)
-            return web.json_response({'status': 'expired'}, headers=get_cors_headers())
+            return web.json_response({'status': 'expired'})
             
-    return web.json_response(status_data, headers=get_cors_headers())
+    return web.json_response(status_data)
 
 async def handle_admin_get_requests(request):
     # Ritorna tutte le richieste in sospeso o processate
-    return web.json_response(PERMISSION_REQUESTS, headers=get_cors_headers())
+    return web.json_response(PERMISSION_REQUESTS)
 
 async def handle_admin_handle_request(request):
     try:
@@ -285,7 +285,7 @@ async def handle_admin_handle_request(request):
         action = data.get('action') # 'approve' or 'reject'
         
         if not u or u not in PERMISSION_REQUESTS:
-            return web.json_response({'success': False, 'message': 'Richiesta non trovata'}, headers=get_cors_headers())
+            return web.json_response({'success': False, 'message': 'Richiesta non trovata'})
             
         req = PERMISSION_REQUESTS[u]
         
@@ -309,9 +309,9 @@ async def handle_admin_handle_request(request):
             PERMISSION_REQUESTS[u] = {'status': 'rejected'}
             await log_event("warning", f"Admin WEB: Richiesta di {u} rifiutata")
             
-        return web.json_response({'success': True}, headers=get_cors_headers())
+        return web.json_response({'success': True})
     except Exception as e:
-        return web.json_response({'success': False, 'message': str(e)}, status=500, headers=get_cors_headers())
+        return web.json_response({'success': False, 'message': str(e)}, status=500)
 
 async def handle_admin_create_user(request):
     try:
@@ -320,11 +320,11 @@ async def handle_admin_create_user(request):
         p = data.get('password')
         role = data.get('role', 'user')
         
-        if not u or not p: return web.json_response({'success': False, 'message': 'Dati mancanti'}, headers=get_cors_headers())
+        if not u or not p: return web.json_response({'success': False, 'message': 'Dati mancanti'})
         
         db = load_db()
         if any(x['username'] == u for x in db):
-             return web.json_response({'success': False, 'message': 'Utente esistente'}, headers=get_cors_headers())
+             return web.json_response({'success': False, 'message': 'Utente esistente'})
              
         db.append({
             "username": u,
@@ -335,9 +335,9 @@ async def handle_admin_create_user(request):
         })
         save_db(db)
         await log_event("success", f"Admin WEB: Creata licenza per {u} ({role})")
-        return web.json_response({'success': True}, headers=get_cors_headers())
+        return web.json_response({'success': True})
     except Exception as e:
-        return web.json_response({'success': False, 'message': str(e)}, status=500, headers=get_cors_headers())
+        return web.json_response({'success': False, 'message': str(e)}, status=500)
 
 async def handle_admin_get_users(request):
     try:
@@ -361,9 +361,9 @@ async def handle_admin_get_users(request):
             
             users.append(user_safe)
             
-        return web.json_response(users, headers=get_cors_headers())
+        return web.json_response(users)
     except Exception as e:
-        return web.json_response({'success': False, 'message': str(e)}, status=500, headers=get_cors_headers())
+        return web.json_response({'success': False, 'message': str(e)}, status=500)
 
 async def handle_admin_update_user(request):
     try:
@@ -372,7 +372,7 @@ async def handle_admin_update_user(request):
         new_role = data.get('role')
         new_status = data.get('status')
         
-        if not u_target: return web.json_response({'success': False, 'message': 'Username mancante'}, headers=get_cors_headers())
+        if not u_target: return web.json_response({'success': False, 'message': 'Username mancante'})
 
         db = load_db()
         found = False
@@ -386,18 +386,18 @@ async def handle_admin_update_user(request):
         if found:
             save_db(db)
             await log_event("info", f"Admin WEB: Aggiornato utente {u_target} (Role: {new_role}, Status: {new_status})")
-            return web.json_response({'success': True}, headers=get_cors_headers())
+            return web.json_response({'success': True})
         else:
-            return web.json_response({'success': False, 'message': 'Utente non trovato'}, headers=get_cors_headers())
+            return web.json_response({'success': False, 'message': 'Utente non trovato'})
     except Exception as e:
-        return web.json_response({'success': False, 'message': str(e)}, status=500, headers=get_cors_headers())
+        return web.json_response({'success': False, 'message': str(e)}, status=500)
 
 async def handle_admin_delete_user(request):
     try:
         data = await request.json()
         u_target = data.get('username')
         
-        if not u_target: return web.json_response({'success': False, 'message': 'Username mancante'}, headers=get_cors_headers())
+        if not u_target: return web.json_response({'success': False, 'message': 'Username mancante'})
 
         db = load_db()
         initial_len = len(db)
@@ -406,11 +406,11 @@ async def handle_admin_delete_user(request):
         if len(db) < initial_len:
             save_db(db)
             await log_event("warning", f"Admin WEB: Eliminato utente {u_target}")
-            return web.json_response({'success': True}, headers=get_cors_headers())
+            return web.json_response({'success': True})
         else:
-            return web.json_response({'success': False, 'message': 'Utente non trovato'}, headers=get_cors_headers())
+            return web.json_response({'success': False, 'message': 'Utente non trovato'})
     except Exception as e:
-        return web.json_response({'success': False, 'message': str(e)}, status=500, headers=get_cors_headers())
+        return web.json_response({'success': False, 'message': str(e)}, status=500)
 
 @web.middleware
 async def logger_middleware(request, handler):
