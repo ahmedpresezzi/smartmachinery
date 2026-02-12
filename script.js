@@ -1563,16 +1563,20 @@ async function runBSWConfigWizard(item, silent = false) {
 
                             let searchScope = (parentNode && parentNode.children) ? parentNode.children : box.content;
 
-                            const profileNode = searchScope.find(child => child.name === profileName);
+                            // Case-insensitive search
+                            const profileNode = searchScope.find(child => child.name.toLowerCase() === profileName.toLowerCase());
+
                             if (profileNode && profileNode.content) {
                                 try {
                                     profile = JSON.parse(profileNode.content);
+                                    addSystemLog('info', `BSW: Profilo ${profileNode.name} trovato (${profile.paramProfile ? profile.paramProfile.length : 0} params)`);
                                 } catch (e) {
                                     console.warn("Invalid profile content:", profileName);
+                                    addSystemLog('warning', `BSW: Profilo ${profileName} invalido (Parse Error)`);
                                 }
+                            } else {
+                                addSystemLog('warning', `BSW: Profilo ${profileName} mancante! (Cercato in ${searchScope.length} files)`);
                             }
-                            // Debug log
-                            if (!profile) console.warn("Profile not found or empty for config:", node.name, "Scope item count:", searchScope.length);
 
                             plcConfigsInfo.push({ config: c, profile: profile });
                         }
