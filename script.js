@@ -52,9 +52,13 @@ let listAllButton = null;
 // ... (other variables)
 
 // --- Unified Backend Config ---
-const BACKEND_BASE = (window.location.hostname === 'localhost' && window.location.port !== '5001')
-    ? 'http://localhost:5001'
-    : '';
+// SE USI GITHUB PAGES: Inserisci qui l'URL del tuo servizio Render (es: 'https://smartmachinery.onrender.com')
+const RENDER_URL = 'https://smartmachinery.onrender.com';
+
+const BACKEND_BASE = (window.location.hostname === 'localhost')
+    ? (window.location.port === '5001' ? '' : 'http://localhost:5001')
+    : (window.location.hostname.includes('onrender.com') ? '' : RENDER_URL);
+
 const BACKEND_API_URL = `${BACKEND_BASE}/api/chat`;
 
 // --- GLOBAL ADMIN FUNCTIONS (Defined early to avoid "is not a function" errors) ---

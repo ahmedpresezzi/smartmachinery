@@ -31,7 +31,7 @@ AUDIT_FILE = os.path.join(BASE_DIR, 'audit.json')
 ASSETS_FILE = os.path.join(BASE_DIR, 'assets.json')
 STATE_FILE = os.path.join(BASE_DIR, 'bot_state.json')
 ROOT_DIR = os.path.dirname(BASE_DIR)
-FRONTEND_DIR = os.path.join(ROOT_DIR, 'Frontend')
+FRONTEND_DIR = ROOT_DIR # Frontend files are now in the root
 
 # OpenRouter Config
 OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')

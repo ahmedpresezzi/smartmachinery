@@ -5,7 +5,7 @@ import os
 
 # Define the absolute path to the Frontend directory
 base_dir = os.path.abspath(os.path.dirname(__file__))
-frontend_dir = os.path.join(base_dir, '..', 'Frontend')
+frontend_dir = base_dir # Frontend files are now in the root
 
 app = Flask(__name__, static_folder=frontend_dir)
 # Enable CORS so the static frontend can call this API
