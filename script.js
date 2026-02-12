@@ -3205,7 +3205,7 @@ function initActivationModal() {
                     bufferRequired: false
                 };
 
-                const backgroundImage = (photoPreview && !photoPreview.classList.contains('hidden')) ? photoPreview.src : '../logos/noimage';
+                const backgroundImage = (photoPreview && !photoPreview.classList.contains('hidden')) ? photoPreview.src : 'logos/noimage';
 
                 const box = boxes.find(b => b.id === currentActivationBoxId);
                 if (box) {
