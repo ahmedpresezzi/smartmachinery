@@ -1898,7 +1898,7 @@ async function runBSWConfigWizard(item, silent = false) {
     }
 }
 
-function runConfigWizard(item) {
+async function runConfigWizard(item) {
     const box = boxes.find(b => b.id === currentEditingBoxId);
     if (!box) return;
 
@@ -1962,19 +1962,58 @@ function runConfigWizard(item) {
     let targetSheet = null;
 
     if (isHighFreq) {
-        if (!box.excelFile || !excelFiles[box.excelFile]) {
-            showInternalAlert(t('script.associateExcelBefore20ms'));
+        // Validation: Verify Excel Association
+        if (!box.excelFile) {
+            showInternalAlert(t('script.associateExcelBefore20ms', [], "Associa prima un file Excel all'asset!"));
             return;
         }
 
-        targetSheet = (box.sheets || []).find(s => {
-            const lowName = s.name.toLowerCase();
+        // Try to find the Excel data
+        let excelData = excelFiles[box.excelFile];
+
+        // If not found in memory, try to reload from backend or checking alternate keys
+        if (!excelData) {
+            console.log("Excel non in memoria, provo refresh...");
+            await loadExcelsFromBackend(); // Async wait
+            excelData = excelFiles[box.excelFile];
+        }
+
+        if (!excelData) {
+            // Fallback: maybe the box.excelFile is just filename, but keys are paths?
+            // Or vice versa. Let's try to find by partial match
+            const key = Object.keys(excelFiles).find(k => k.includes(box.excelFile) || box.excelFile.includes(k));
+            if (key) excelData = excelFiles[key];
+        }
+
+        if (!excelData) {
+            showInternalAlert(`File Excel '${box.excelFile}' non trovato in memoria. Ricarica la pagina.`);
+            return;
+        }
+
+        // Parse sheets if needed (usually done in loadExcelsFromBackend but let's be sure)
+        // Actually excelData IS the workbook object usually, or array of sheets?
+        // In this app structure, excelFiles[name] seems to be the workbook OR array of sheets.
+        // Let's check `parseExcelFile` implementation if I could see it, but I assume it's array of sheets.
+
+        let sheets = [];
+        if (Array.isArray(excelData)) sheets = excelData;
+        else if (excelData.sheets) sheets = excelData.sheets; // Handle structure
+        else sheets = []; // Invalid
+
+        if (sheets.length === 0) {
+            showInternalAlert(`Il file Excel '${box.excelFile}' sembra vuoto o illeggibile.`);
+            return;
+        }
+
+        targetSheet = sheets.find(s => {
+            const lowName = s.name.toLowerCase(); // Sheet Name
+            // Regex to find 20 or 50 as whole word
             const regex = new RegExp(`(^|[^0-9])${freqInt}([^0-9]|$)`);
-            return regex.test(lowName);
+            return regex.test(lowName) || lowName.includes(`${freqInt}ms`);
         });
 
         if (!targetSheet) {
-            showInternalAlert(t('script.pageNotFoundForFreq', [freqInt]));
+            showInternalAlert(`Nessun foglio trovato per ${freqInt}ms nel file Excel (es. "Foglio 20ms").`);
             return;
         }
 
