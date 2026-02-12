@@ -89,6 +89,11 @@ function initWebSocket() {
             if (typeof loadAdminUsers === 'function') loadAdminUsers();
             if (typeof loadAdminRequests === 'function') loadAdminRequests();
         }
+
+        if (data.type === 'excels_updated') {
+            console.log("[WS] Refreshing excels...");
+            if (typeof loadExcelsFromBackend === 'function') await loadExcelsFromBackend();
+        }
     };
 
     socket.onclose = (e) => {

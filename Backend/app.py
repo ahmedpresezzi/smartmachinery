@@ -280,6 +280,8 @@ async def handle_upload_excel(request):
         print(f"✅ File salvato: {filename}")
         # Backup to Discord
         asyncio.create_task(backup_to_discord(file_path, filename))
+        # Broadcast real-time update
+        await broadcast({'type': 'excels_updated'})
         
         return web.json_response({'success': True, 'filename': filename})
     except Exception as e:
