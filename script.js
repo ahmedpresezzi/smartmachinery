@@ -1578,6 +1578,14 @@ async function runBSWConfigWizard(item, silent = false) {
                                 addSystemLog('warning', `BSW: Profilo ${profileName} mancante! (Cercato in ${searchScope.length} files)`);
                             }
 
+
+                            // Check for placeholders
+                            if (String(c.devices[0].pollingTime).includes("FREQUENZA") || String(c.devices[0].name).includes("NOME")) {
+                                showInternalAlert("Configurazione PLC incompleta (trovati valori default). Esegui prima la Configurazione Guidata PLC (tasto destro -> Configura PLC).");
+                                addSystemLog('error', `BSW: Configurazione incompleta. Generazione interrotta.`);
+                                return;
+                            }
+
                             plcConfigsInfo.push({ config: c, profile: profile });
                         }
                     } catch (e) { console.warn("Skipping invalid config:", node.id); }
