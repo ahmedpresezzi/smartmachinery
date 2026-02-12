@@ -52,7 +52,9 @@ let listAllButton = null;
 // ... (other variables)
 
 // --- Unified Backend Config ---
-const BACKEND_BASE = (window.location.port === '5001') ? '' : 'http://localhost:5001';
+const BACKEND_BASE = (window.location.hostname === 'localhost' && window.location.port !== '5001')
+    ? 'http://localhost:5001'
+    : '';
 const BACKEND_API_URL = `${BACKEND_BASE}/api/chat`;
 
 // --- GLOBAL ADMIN FUNCTIONS (Defined early to avoid "is not a function" errors) ---
