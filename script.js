@@ -1560,16 +1560,20 @@ async function runBSWConfigWizard(item, silent = false) {
                             const profileId = c.devices[0].profileId || 'profile';
                             const profileName = profileId + '.json';
                             let profile = null;
-                            if (parentNode && parentNode.children) {
-                                const profileNode = parentNode.children.find(child => child.name === profileName);
-                                if (profileNode && profileNode.content) {
-                                    try {
-                                        profile = JSON.parse(profileNode.content);
-                                    } catch (e) {
-                                        console.warn("Invalid profile content:", profileName);
-                                    }
+
+                            let searchScope = (parentNode && parentNode.children) ? parentNode.children : box.content;
+
+                            const profileNode = searchScope.find(child => child.name === profileName);
+                            if (profileNode && profileNode.content) {
+                                try {
+                                    profile = JSON.parse(profileNode.content);
+                                } catch (e) {
+                                    console.warn("Invalid profile content:", profileName);
                                 }
                             }
+                            // Debug log
+                            if (!profile) console.warn("Profile not found or empty for config:", node.name, "Scope item count:", searchScope.length);
+
                             plcConfigsInfo.push({ config: c, profile: profile });
                         }
                     } catch (e) { console.warn("Skipping invalid config:", node.id); }
