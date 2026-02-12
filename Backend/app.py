@@ -141,19 +141,41 @@ def load_state():
 def save_state(state):
     with open(STATE_FILE, 'w') as f: json.dump(state, f, indent=4)
 
-def get_cors_headers():
-    return {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization'}
+@web.middleware
+async def cors_middleware(request, handler):
+    # Handle preflight OPTIONS requests
+    if request.method == 'OPTIONS':
+        return web.Response(status=204, headers={
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Max-Age': '86400',
+        })
+    
+    # Handle the actual request
+    try:
+        response = await handler(request)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    except web.HTTPException as ex:
+        ex.headers['Access-Control-Allow-Origin'] = '*'
+        raise ex
+    except Exception as e:
+        print(f"Middleware Error: {e}")
+        raise
 
 async def handle_get_assets(request):
-    return web.json_response(load_assets(), headers=get_cors_headers())
+    return web.json_response(load_assets())
 
 async def handle_save_assets(request):
     try:
         data = await request.json()
         save_assets(data)
-        return web.json_response({'success': True}, headers=get_cors_headers())
+        return web.json_response({'success': True})
     except Exception as e:
-        return web.json_response({'success': False, 'message': str(e)}, status=500, headers=get_cors_headers())
+        return web.json_response({'success': False, 'message': str(e)}, status=500)
 
 async def handle_index(request):
     p = os.path.join(FRONTEND_DIR, 'index.html')
@@ -396,7 +418,7 @@ async def logger_middleware(request, handler):
     return await handler(request)
 
 async def start_webserver():
-    app = web.Application(middlewares=[logger_middleware])
+    app = web.Application(middlewares=[logger_middleware, cors_middleware])
     app.router.add_post('/login', handle_login)
     app.router.add_get('/logs', handle_get_logs)
     app.router.add_post('/api/chat', handle_chat)
@@ -411,7 +433,6 @@ async def start_webserver():
     app.router.add_get('/api/admin/users', handle_admin_get_users)
     app.router.add_post('/api/admin/update-user', handle_admin_update_user)
     app.router.add_post('/api/admin/delete-user', handle_admin_delete_user)
-    app.router.add_options('/{tail:.*}', lambda r: web.Response(status=204, headers=get_cors_headers()))
     app.router.add_get('/', handle_index)
     if os.path.exists(FRONTEND_DIR): app.router.add_static('/', path=FRONTEND_DIR, name='static')
     LOGOS_DIR = os.path.join(ROOT_DIR, 'logos')
