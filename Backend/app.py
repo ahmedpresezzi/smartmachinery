@@ -434,14 +434,24 @@ async def start_webserver():
     app.router.add_post('/api/admin/update-user', handle_admin_update_user)
     app.router.add_post('/api/admin/delete-user', handle_admin_delete_user)
     app.router.add_get('/', handle_index)
-    if os.path.exists(FRONTEND_DIR): app.router.add_static('/', path=FRONTEND_DIR, name='static')
-    LOGOS_DIR = os.path.join(ROOT_DIR, 'logos')
-    if os.path.exists(LOGOS_DIR): app.router.add_static('/logos/', path=LOGOS_DIR, name='logos')
+    
+    # Static files (CSS, JS, Logos) are in the root
+    if os.path.exists(FRONTEND_DIR):
+        app.router.add_static('/logos/', path=os.path.join(ROOT_DIR, 'logos'), name='logos')
+        # Serving root static files EXCEPT python files
+        for f in os.listdir(FRONTEND_DIR):
+            if f.endswith(('.css', '.js', '.png', '.jpg', '.ico', '.html', '.json')):
+                 if os.path.isfile(os.path.join(FRONTEND_DIR, f)):
+                     # We don't add static for every file, just the root
+                     pass
+        app.router.add_static('/', path=FRONTEND_DIR, name='static')
+
     runner = web.AppRunner(app)
     await runner.setup()
     port = int(os.getenv('PORT', 5001))
     await web.TCPSite(runner, '0.0.0.0', port).start()
-    print(f"🚀 SERVER WEB ATTIVO: http://localhost:{port}")
+    print(f"🚀 SERVER WEB ATTIVO: http://0.0.0.0:{port}")
+    print(f"📡 Backend Base URL: https://smartmachinery-1.onrender.com")
 
 # --- DISCORD COMPONENTS ---
 
@@ -641,6 +651,24 @@ async def on_message(message):
             d = emb.fields[1].value.replace("`", "")
             await message.channel.send(content=f"🔔 **Nuova Richiesta** di `{u}` (Durata: `{d}`):", view=AdminRequestView(u, d))
     await bot.process_commands(message)
+
+@bot.event
+async def on_interaction(interaction: discord.Interaction):
+    # Log interactions to help debug "Interaction failed"
+    # print(f"Interaction: {interaction.type} from {interaction.user}")
+    await bot.process_application_commands(interaction)
+
+@bot.event
+async def on_error(event, *args, **kwargs):
+    import traceback
+    print(f"❌ BOT ERROR in {event}:")
+    traceback.print_exc()
+
+@bot.tree.error
+async def on_app_command_error(interaction: discord.Interaction, error):
+    print(f"❌ Slash Command Error: {error}")
+    if not interaction.response.is_done():
+        await interaction.response.send_message(f"⚠️ Errore interno: {error}", ephemeral=True)
 
 @bot.event
 async def on_ready():
