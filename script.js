@@ -1801,7 +1801,7 @@ async function runBSWConfigWizard(item, silent = false) {
             });
         });
 
-        // Static Aspects
+        // Add Standard Static Aspects (Dynamic but standard structure)
         bswConfig.aspects.push(
             { "input_id": 1, "name": "aggrData", "mapping_file": null, "first_write": false, "update": 300, "breakers": [], "datapoint": [] },
             { "input_id": 1, "name": "stateTransition", "mapping_file": null, "first_write": false, "update": 60, "breakers": [], "datapoint": [] },
@@ -1812,6 +1812,7 @@ async function runBSWConfigWizard(item, silent = false) {
             { "input_id": 1, "name": "activeAlarms", "mapping_file": null, "first_write": true, "update": "on_var", "breakers": [], "datapoint": [{ "name": "alarmsResume", "type": "bool", "input_data": {}, "used_func": "activeAlarmEdge" }] },
             { "input_id": 1, "name": "historyAlarm", "mapping_file": null, "first_write": false, "update": { "write_if_up": { "update_kind": 0, "bool_name": "activeAlarms.alarmsResume" } }, "breakers": [], "datapoint": [] }
         );
+
 
         item.content = JSON.stringify(bswConfig, null, 4);
         if (!silent) showInternalAlert(t('script.bswGenerated'));
