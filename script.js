@@ -1848,7 +1848,7 @@ const BSW_CONFIG_TEMPLATE = {
     }
 };
 
-function runBSWConfigWizard(item, silent = false) {
+async function runBSWConfigWizard(item, silent = false) {
     if (!item) return;
     const box = boxes.find(b => b.id === currentEditingBoxId);
     if (!box) return;
@@ -2079,6 +2079,7 @@ function runBSWConfigWizard(item, silent = false) {
         if (!silent) showInternalAlert(t('script.bswGenerated'));
         renderExplorer();
         checkFinalAutomation(box);
+        await syncBoxesWithBackend();
 
     } catch (e) {
         console.error("BSW Wizard Error:", e);
@@ -2196,7 +2197,7 @@ function runConfigWizard(item) {
         });
     }
 
-    showConfigWizardModal("Configurazione Guidata Asset", fields, (data) => {
+    showConfigWizardModal("Configurazione Guidata Asset", fields, async (data) => {
         try {
             const ipPlc = data.ip;
             const nomeRedis = data.redisName;
@@ -2303,6 +2304,7 @@ function runConfigWizard(item) {
             renderExplorer();
             checkFinalAutomation(box);
             addSystemLog('info', 'Configurazione guidata completata per asset: ' + box.name);
+            await syncBoxesWithBackend();
 
         } catch (e) {
             console.error("Wizard error:", e);
