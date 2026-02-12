@@ -17,6 +17,7 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 WEBHOOK_LOGS = os.getenv('WEBHOOK_LOGS')
 WEBHOOK_PERMS = os.getenv('WEBHOOK_PERMS')
+BACKUP_CHANNEL_ID = os.getenv('BACKUP_CHANNEL_ID') # ID del canale per i backup .json
 
 if not TOKEN:
     print("❌ CRITICAL: DISCORD_TOKEN is missing from environment variables!")
@@ -91,6 +92,8 @@ def save_assets(data):
             json.dump(data, f, indent=4)
             f.flush()
             os.fsync(f.fileno())
+        # Triggers cloud backup
+        asyncio.create_task(backup_to_discord(ASSETS_FILE, "assets.json"))
     except Exception as e: print(f"ERR ASSETS: {e}")
 
 # --- UTILITIES ---
@@ -113,7 +116,41 @@ def save_db(data):
             json.dump(data, f, indent=4)
             f.flush()
             os.fsync(f.fileno())
+        # Triggers cloud backup
+        asyncio.create_task(backup_to_discord(DB_FILE, "user.json"))
     except Exception as e: print(f"ERR DB: {e}")
+
+async def backup_to_discord(file_path, filename):
+    """Sends the JSON file to a Discord channel for persistence."""
+    if not bot.is_ready() or not BACKUP_CHANNEL_ID: return
+    try:
+        channel = bot.get_channel(int(BACKUP_CHANNEL_ID))
+        if channel:
+            with open(file_path, 'rb') as f:
+                await channel.send(f"📦 Backup Autogenerato: `{filename}`", file=discord.File(f, filename))
+    except Exception as e:
+        print(f"❌ Backup Error: {e}")
+
+async def restore_from_discord():
+    """Recover latest JSON files from Discord history on startup."""
+    if not BACKUP_CHANNEL_ID: return
+    print("📥 Tentativo di ripristino dati da Discord...")
+    try:
+        channel = await bot.fetch_channel(int(BACKUP_CHANNEL_ID))
+        files_to_restore = ["user.json", "assets.json"]
+        found_files = set()
+        
+        async for message in channel.history(limit=50):
+            if not message.attachments: continue
+            for att in message.attachments:
+                if att.filename in files_to_restore and att.filename not in found_files:
+                    path = os.path.join(BASE_DIR, att.filename)
+                    await att.save(path)
+                    found_files.add(att.filename)
+                    print(f"✅ Ripristinato: {att.filename}")
+            if len(found_files) == len(files_to_restore): break
+    except Exception as e:
+        print(f"❌ Restore Error: {e}")
 
 async def log_event(event_type, message):
     logs = []
@@ -716,7 +753,8 @@ async def on_app_command_error(interaction: discord.Interaction, error):
 @bot.event
 async def on_ready():
     print(f"✅ Bot Discord Online: {bot.user}")
-    await asyncio.sleep(2) # Wait for network
+    await restore_from_discord() # Recupera i dati prima di procedere
+    await asyncio.sleep(1)
     await update_main_dashboard()
 
 @bot.command()
