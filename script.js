@@ -298,6 +298,25 @@ window.deleteUser = deleteUser;
 
 // Dati
 let excelFiles = {}; // {fileName: {file, workbook (ExcelJS), buffer}}
+
+async function loadExcelsFromBackend() {
+    console.log("[STORAGE] Caricamento file excel dal server...");
+    try {
+        const response = await fetch(`${BACKEND_BASE}/api/get-excels`);
+        const fileNames = await response.json();
+
+        for (const fileName of fileNames) {
+            console.log(`[STORAGE] Recupero file: ${fileName}`);
+            const fileRes = await fetch(`${BACKEND_BASE}/api/excel/${fileName}`);
+            const blob = await fileRes.blob();
+            const file = new File([blob], fileName);
+            await handleExcelFile(file, false); // false = don't re-upload
+        }
+        console.log(`[STORAGE] ${fileNames.length} file excel caricati.`);
+    } catch (error) {
+        console.error("[STORAGE] Errore caricamento excel:", error);
+    }
+}
 let fileGroups = {}; // { groupName: [fileName1, fileName2] }
 let selectedFileName = null;
 let selectedSheetName = null;
@@ -436,6 +455,7 @@ if (loginForm) {
 
                         // Carica i dati dal backend prima di mostrare la dashboard
                         await loadBoxesFromBackend();
+                        await loadExcelsFromBackend();
 
                         setTimeout(() => {
                             welcomeDashboard.classList.add('hidden');
@@ -3818,7 +3838,7 @@ function handleCreateGroup() {
 }
 
 
-async function handleExcelFile(file) {
+async function handleExcelFile(file, shouldUpload = true) {
     // Verifica che sia un file Excel
     const validExtensions = ['.xlsx', '.xls'];
     const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
@@ -3843,6 +3863,18 @@ async function handleExcelFile(file) {
                     buffer: buffer, // Keep buffer if needed
                     sheets: workbook.worksheets.map(ws => ws.name)
                 };
+
+                // Upload to server if needed
+                if (shouldUpload) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    fetch(`${BACKEND_BASE}/api/upload-excel`, {
+                        method: 'POST',
+                        body: formData
+                    }).then(res => res.json())
+                        .then(data => console.log("Upload response:", data))
+                        .catch(err => console.error("Upload failed:", err));
+                }
 
                 // IMPORTANT: update UI
                 updateFilesList();

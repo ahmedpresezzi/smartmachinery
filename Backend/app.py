@@ -42,6 +42,10 @@ ASSETS_FILE = os.path.join(BASE_DIR, 'assets.json')
 STATE_FILE = os.path.join(BASE_DIR, 'bot_state.json')
 ROOT_DIR = os.path.dirname(BASE_DIR)
 FRONTEND_DIR = ROOT_DIR # Frontend files are now in the root
+UPLOADS_DIR = os.path.join(BASE_DIR, 'uploads')
+
+if not os.path.exists(UPLOADS_DIR):
+    os.makedirs(UPLOADS_DIR)
 
 # OpenRouter Config
 OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
@@ -121,34 +125,45 @@ def save_db(data):
     except Exception as e: print(f"ERR DB: {e}")
 
 async def backup_to_discord(file_path, filename):
-    """Sends the JSON file to a Discord channel for persistence."""
+    """Sends any file to the backup Discord channel."""
     if not bot.is_ready() or not BACKUP_CHANNEL_ID: return
     try:
         channel = bot.get_channel(int(BACKUP_CHANNEL_ID))
         if channel:
             with open(file_path, 'rb') as f:
-                await channel.send(f"📦 Backup Autogenerato: `{filename}`", file=discord.File(f, filename))
+                await channel.send(f"📦 Backup: `{filename}`", file=discord.File(f, filename))
     except Exception as e:
-        print(f"❌ Backup Error: {e}")
+        print(f"❌ Backup Error for {filename}: {e}")
 
 async def restore_from_discord():
-    """Recover latest JSON files from Discord history on startup."""
+    """Recover latest JSON and Excel files from Discord history on startup."""
     if not BACKUP_CHANNEL_ID: return
     print("📥 Tentativo di ripristino dati da Discord...")
     try:
         channel = await bot.fetch_channel(int(BACKUP_CHANNEL_ID))
-        files_to_restore = ["user.json", "assets.json"]
-        found_files = set()
+        # Files we definitely want to restore if found
+        core_files = ["user.json", "assets.json"]
+        found_core = set()
         
-        async for message in channel.history(limit=50):
+        async for message in channel.history(limit=100):
             if not message.attachments: continue
             for att in message.attachments:
-                if att.filename in files_to_restore and att.filename not in found_files:
+                # Core files: restore the most recent one (first found in history)
+                if att.filename in core_files and att.filename not in found_core:
                     path = os.path.join(BASE_DIR, att.filename)
                     await att.save(path)
-                    found_files.add(att.filename)
-                    print(f"✅ Ripristinato: {att.filename}")
-            if len(found_files) == len(files_to_restore): break
+                    found_core.add(att.filename)
+                    print(f"✅ Ripristinato core: {att.filename}")
+                
+                # Excel files: restore all unique excel files found in history
+                elif att.filename.endswith(('.xlsx', '.xls')):
+                    path = os.path.join(UPLOADS_DIR, att.filename)
+                    if not os.path.exists(path):
+                        await att.save(path)
+                        print(f"✅ Ripristinato excel: {att.filename}")
+            
+            # Stop if we found all core files (optional, we might want to keep looking for excels)
+            # if len(found_core) == len(core_files): break
     except Exception as e:
         print(f"❌ Restore Error: {e}")
 
@@ -245,6 +260,43 @@ async def handle_ws(request):
 
 async def handle_get_assets(request):
     return web.json_response(load_assets())
+
+async def handle_upload_excel(request):
+    try:
+        reader = await request.multipart()
+        field = await reader.next()
+        filename = field.filename
+        
+        # Security: strip path traversal
+        filename = os.path.basename(filename)
+        file_path = os.path.join(UPLOADS_DIR, filename)
+        
+        with open(file_path, 'wb') as f:
+            while True:
+                chunk = await field.read_chunk()
+                if not chunk: break
+                f.write(chunk)
+        
+        print(f"✅ File salvato: {filename}")
+        # Backup to Discord
+        asyncio.create_task(backup_to_discord(file_path, filename))
+        
+        return web.json_response({'success': True, 'filename': filename})
+    except Exception as e:
+        return web.json_response({'success': False, 'message': str(e)}, status=500)
+
+async def handle_get_excels(request):
+    files = []
+    if os.path.exists(UPLOADS_DIR):
+        files = [f for f in os.listdir(UPLOADS_DIR) if f.endswith(('.xlsx', '.xls'))]
+    return web.json_response(files)
+
+async def handle_serve_excel(request):
+    filename = request.match_info['filename']
+    file_path = os.path.join(UPLOADS_DIR, filename)
+    if os.path.exists(file_path):
+        return web.FileResponse(file_path)
+    return web.Response(status=404)
 
 async def handle_save_assets(request):
     try:
@@ -503,6 +555,9 @@ async def start_webserver():
     app.router.add_post('/api/chat', handle_chat)
     app.router.add_get('/api/get-assets', handle_get_assets)
     app.router.add_post('/api/save-assets', handle_save_assets)
+    app.router.add_post('/api/upload-excel', handle_upload_excel)
+    app.router.add_get('/api/get-excels', handle_get_excels)
+    app.router.add_get('/api/excel/{filename}', handle_serve_excel)
 
     app.router.add_post('/api/request-perms', handle_request_perms)
     app.router.add_get('/api/check-status', handle_check_status)
@@ -760,15 +815,19 @@ async def on_ready():
 @bot.command()
 async def auth(ctx):
     # Elimina comando per pulizia
-    try: await ctx.message.delete()
-    except: pass
+    try:
+        await ctx.message.delete()
+    except:
+        pass
     
+    # Send embed and view
     msg = await ctx.send(embed=create_main_embed(), view=MainAuthView())
     save_state({'channel_id': ctx.channel.id, 'message_id': msg.id})
-    await ctx.send("✅ Hub di gestione attivato. Verrà aggiornato automaticamente ad ogni avvio.", delete_after=5)
+    print(f"Auth command executed in channel {ctx.channel.id}")
 
 @bot.command()
-async def prova(ctx): await ctx.send('ciao')
+async def prova(ctx):
+    await ctx.send('ciao')
 
 async def main():
     print("Starting main application sequence...")
