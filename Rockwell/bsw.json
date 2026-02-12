@@ -1,0 +1,2182 @@
+{
+    "input_info": [
+        {
+            "input_id": 1,
+            "redis": {
+                "hostname": "redis",
+                "port": 6379,
+                "channelData": "data-plc-destacker-500",
+                "username": null,
+                "password": null,
+                "db": 0,
+                "keyStatus": "status-plc-destacker-500",
+                "sleeping_time": 0.1,
+                "output_status": {
+                    "kind": "print",
+                    "topic": null,
+                    "hostname": null,
+                    "port": null,
+                    "username": null,
+                    "password": null
+                }
+            }
+        },
+        {
+            "input_id": 2,
+            "redis": {
+                "hostname": "redis",
+                "port": 6379,
+                "channelData": "data-plc-destacker-150",
+                "username": null,
+                "password": null,
+                "db": 0,
+                "keyStatus": "status-plc-destacker-150",
+                "sleeping_time": 0.1,
+                "output_status": {
+                    "kind": "print",
+                    "topic": null,
+                    "hostname": null,
+                    "port": null,
+                    "username": null,
+                    "password": null
+                }
+            }
+        }
+    ],
+    "output_info": [
+        {
+            "influxdb": {
+                "tags": [
+                    "historyAlarm.aggr0",
+                    "historyAlarm.code",
+                    "historyAlarm.isFirst"
+                ],
+                "use_asp_name": false,
+                "host": "influxdb",
+                "port": 8086,
+                "username": "40f",
+                "password": "fCLgYTRSJHF4LjGedrHcl85x6",
+                "ssl": false,
+                "database": "MCC0f0bf29f3628469184e4e817319cc402",
+                "measurement": "historyAlarm",
+                "retention_policy": {
+                    "name": "retention_prod",
+                    "days": 900
+                },
+                "aspects_to_write": [
+                    "historyAlarm"
+                ]
+            }
+        },
+        {
+            "influxdb": {
+                "tags": [
+                    "stateTransition.aggr0"
+                ],
+                "use_asp_name": false,
+                "host": "influxdb",
+                "port": 8086,
+                "username": "40f",
+                "password": "fCLgYTRSJHF4LjGedrHcl85x6",
+                "ssl": false,
+                "database": "MCC0f0bf29f3628469184e4e817319cc402",
+                "measurement": "stateTransition",
+                "retention_policy": {
+                    "name": "retention_prod",
+                    "days": 900
+                },
+                "aspects_to_write": [
+                    "stateTransition"
+                ]
+            }
+        },
+        {
+            "influxdb": {
+                "tags": [
+                    "aggrData.aggr0"
+                ],
+                "use_asp_name": false,
+                "host": "influxdb",
+                "port": 8086,
+                "username": "40f",
+                "password": "fCLgYTRSJHF4LjGedrHcl85x6",
+                "ssl": false,
+                "database": "MCC0f0bf29f3628469184e4e817319cc402",
+                "measurement": "aggrData",
+                "retention_policy": {
+                    "name": "retention_prod",
+                    "days": 900
+                },
+                "aspects_to_write": [
+                    "aggrData"
+                ]
+            }
+        },
+        {
+            "influxdb": {
+                "tags": [],
+                "use_asp_name": false,
+                "host": "influxdb",
+                "port": 8086,
+                "username": "40f",
+                "password": "fCLgYTRSJHF4LjGedrHcl85x6",
+                "ssl": false,
+                "database": "MCC0f0bf29f3628469184e4e817319cc402",
+                "measurement": "rawDataParams",
+                "retention_policy": {
+                    "name": "retention_raw",
+                    "days": 365
+                },
+                "aspects_to_write": [
+                    "rawDataParams"
+                ]
+            }
+        },
+        {
+            "influxdb": {
+                "tags": [],
+                "use_asp_name": false,
+                "host": "influxdb",
+                "port": 8086,
+                "username": "40f",
+                "password": "fCLgYTRSJHF4LjGedrHcl85x6",
+                "ssl": false,
+                "database": "MCC0f0bf29f3628469184e4e817319cc402",
+                "measurement": "rawData500",
+                "retention_policy": {
+                    "name": "retention_raw",
+                    "days": 365
+                },
+                "aspects_to_write": [
+                    "rawData500"
+                ]
+            }
+        },
+        {
+            "influxdb": {
+                "tags": [],
+                "use_asp_name": false,
+                "host": "influxdb",
+                "port": 8086,
+                "username": "40f",
+                "password": "fCLgYTRSJHF4LjGedrHcl85x6",
+                "ssl": false,
+                "database": "MCC0f0bf29f3628469184e4e817319cc402",
+                "measurement": "rawData150",
+                "retention_policy": {
+                    "name": "retention_raw",
+                    "days": 365
+                },
+                "aspects_to_write": [
+                    "rawData150"
+                ]
+            }
+        },
+        {
+            "influxdb": {
+                "tags": [
+                    "historyCycle.aggr0"
+                ],
+                "use_asp_name": false,
+                "host": "influxdb",
+                "port": 8086,
+                "username": "40f",
+                "password": "fCLgYTRSJHF4LjGedrHcl85x6",
+                "ssl": false,
+                "database": "MCC0f0bf29f3628469184e4e817319cc402",
+                "measurement": "historyCycle",
+                "retention_policy": {
+                    "name": "retention_prod",
+                    "days": 900
+                },
+                "aspects_to_write": [
+                    "historyCycle"
+                ]
+            }
+        },
+        {
+            "influxdb": {
+                "tags": [
+                    "historyParams.aggr0",
+                    "historyParams.code"
+                ],
+                "use_asp_name": false,
+                "host": "influxdb",
+                "port": 8086,
+                "username": "40f",
+                "password": "fCLgYTRSJHF4LjGedrHcl85x6",
+                "ssl": false,
+                "database": "MCC0f0bf29f3628469184e4e817319cc402",
+                "measurement": "historyParams",
+                "retention_policy": {
+                    "name": "retention_prod",
+                    "days": 900
+                },
+                "aspects_to_write": [
+                    "historyParams"
+                ]
+            }
+        },
+        {
+            "json": {
+                "use_asp_name": true,
+                "snapshot": true,
+                "file_path": "mind",
+                "snapshot_name": "rawData500",
+                "aspects_to_write": [
+                    "rawData500"
+                ]
+            }
+        },
+        {
+            "json": {
+                "use_asp_name": true,
+                "snapshot": true,
+                "file_path": "mind",
+                "snapshot_name": "rawData150",
+                "aspects_to_write": [
+                    "rawData150"
+                ]
+            }
+        },
+        {
+            "json": {
+                "use_asp_name": true,
+                "snapshot": true,
+                "file_path": "mind",
+                "snapshot_name": "stateTransition",
+                "aspects_to_write": [
+                    "stateTransition"
+                ]
+            }
+        }
+    ],
+    "aspects": [
+        {
+            "input_id": 1,
+            "name": "utils",
+            "mapping_file": null,
+            "first_write": false,
+            "update": "never",
+            "breakers": [],
+            "datapoint": []
+        },
+        {
+            "input_id": 1,
+            "name": "rawData500",
+            "mapping_file": null,
+            "first_write": false,
+            "update": 0.1,
+            "breakers": [],
+            "datapoint": [
+                {
+                    "name": "var_0",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Machine_Mode"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_4",
+                    "type": "double",
+                    "input_data": {
+                        "var": "MachineStatus_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_5",
+                    "type": "double",
+                    "input_data": {
+                        "var": "MachineStatus_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_10",
+                    "type": "double",
+                    "input_data": {
+                        "var": "MachineStatus_8"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_11",
+                    "type": "double",
+                    "input_data": {
+                        "var": "MachineStatus_9"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_12",
+                    "type": "double",
+                    "input_data": {
+                        "var": "MachineStatus_10"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_13",
+                    "type": "double",
+                    "input_data": {
+                        "var": "MachineStatus_11"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_14",
+                    "type": "double",
+                    "input_data": {
+                        "var": "MachineStatus_12"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_15",
+                    "type": "double",
+                    "input_data": {
+                        "var": "MachineStatus_13"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_16",
+                    "type": "double",
+                    "input_data": {
+                        "var": "MachineStatus_14"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_17",
+                    "type": "double",
+                    "input_data": {
+                        "var": "MachineStatus_15"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_18",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Loader_Billet_ID"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_19",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Loader_Set_Billet_Length"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_20",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Loader_Real_Billet_Length"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_21",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Loader_Billet_Diameter"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_22",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Loader_Billet_Weight"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_23",
+                    "type": "string",
+                    "input_data": {
+                        "var": "Loader_Billet_Alloy"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_24",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Press_Order_Number"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_25",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Press_Die_Number"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_26",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Set_Extrusion_Number"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_27",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Extrusion_Number"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_28",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Total_Extruded_Billet"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_29",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Press_Billet_ID"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_30",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Press_Set_Billet_Length"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_31",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Press_Real_Billet_Length"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_32",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Press_Billet_Diameter"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_33",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Press_Billet_Weight"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_34",
+                    "type": "string",
+                    "input_data": {
+                        "var": "Press_Billet_Alloy"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_35",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Compressed_Billet_Length"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_36",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Set_ButtEnd_Length"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_37",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_ButtEnd_Length"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_38",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_ButtEnd_Weight"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_39",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Press_Actual_Sequence"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_40",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Main_Cylinder_Position"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_41",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Extrusion_Pressure"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_42",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Container_Pressure"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_43",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Oil_Temperature"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_44",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Pumps_Number_In_Extrusion"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_45",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Profile_Temperature_Extrusion"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_46",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Profile_Temperature_Quench"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_47",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Extrusion_Time"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_48",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Dead_Time"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_49",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Billet_Waiting_Time"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_50",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Puller_Waiting_Time"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_51",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Die_Change_Time"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_52",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Power_MainLine"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_53",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Power_Container"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_54",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Energy_MainLine"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_55",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Energy_Container"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_56",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Set_Extrusion_Length"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_57",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Extrusion_Length"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_58",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Set_Extrusion_Speed"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_59",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Extrusion_Speed"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_60",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Minimum_Pressure_Extrusion"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_61",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Voltage_L1_MainLine"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_62",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Voltage_L2_MainLine"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_63",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Voltage_L3_MainLine"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_64",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Current_L1_MainLine"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_65",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Current_L2_MainLine"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_66",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Current_L3_MainLine"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_67",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Frequency_MainLine"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_68",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_PowerFactor_MainLine"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_69",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Voltage_L1_Container"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_70",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Voltage_L2_Container"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_71",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Voltage_L3_Container"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_72",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Current_L1_Container"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_73",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Current_L2_Container"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_74",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Current_L3_Container"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_75",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_Frequency_Container"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_76",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Actual_PowerFactor_Container"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_77",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Press_Order_Item_Number"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_78",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Press_Die_Copy_Number"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_79",
+                    "type": "string",
+                    "input_data": {
+                        "var": "Press_Billet_Casting"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_80",
+                    "type": "string",
+                    "input_data": {
+                        "var": "Press_Billet_LogNumber"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_81",
+                    "type": "string",
+                    "input_data": {
+                        "var": "Press_Billet_Order_Lot"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_82",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_1_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_84",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_1_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_85",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_1_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_86",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_1_4"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_87",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_1_5"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_88",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_1_6"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_89",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_1_7"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_90",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_2_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_91",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_2_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_93",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_2_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_94",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_2_4"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_95",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_2_5"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_96",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_2_6"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_98",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_3_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_99",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_3_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_101",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_3_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_103",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_3_5"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_104",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_3_6"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_105",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_3_7"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_106",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_4_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_109",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_4_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_110",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_4_4"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_111",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_4_5"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_112",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_4_6"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_114",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_5_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_115",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_5_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_116",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_5_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_117",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_5_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_118",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_5_4"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_119",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_5_5"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_120",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_5_6"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_122",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_6_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_123",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_6_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_124",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_6_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_125",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_6_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_126",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_6_4"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_130",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_7_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_131",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_7_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_132",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_7_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_133",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_7_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_138",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_8_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_139",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_8_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_140",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_8_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_141",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_8_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_146",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_9_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_147",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_9_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_148",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_9_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_149",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_9_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_150",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_9_4"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_154",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_10_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_155",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_10_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_156",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_10_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_157",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_10_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_162",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_11_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_163",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_11_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_164",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_11_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_165",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_11_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_167",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_11_5"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_168",
+                    "type": "double",
+                    "input_data": {
+                        "var": "DigitalInput_11_6"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_191",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ContainerThermocouple_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_192",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ContainerThermocouple_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_193",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ContainerThermocouple_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_194",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ContainerThermocouple_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_195",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ContainerThermocouple_4"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_196",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ContainerThermocouple_5"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_197",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ContainerThermocouple_6"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_198",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ContainerThermocouple_7"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_199",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ContainerThermocouple_8"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_207",
+                    "type": "double",
+                    "input_data": {
+                        "var": "AnalogInput_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_208",
+                    "type": "double",
+                    "input_data": {
+                        "var": "AnalogInput_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_209",
+                    "type": "double",
+                    "input_data": {
+                        "var": "AnalogInput_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_210",
+                    "type": "double",
+                    "input_data": {
+                        "var": "AnalogInput_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_211",
+                    "type": "double",
+                    "input_data": {
+                        "var": "AnalogInput_4"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_212",
+                    "type": "double",
+                    "input_data": {
+                        "var": "AnalogInput_5"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_213",
+                    "type": "double",
+                    "input_data": {
+                        "var": "AnalogInput_6"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_214",
+                    "type": "double",
+                    "input_data": {
+                        "var": "AnalogInput_7"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_215",
+                    "type": "double",
+                    "input_data": {
+                        "var": "AnalogInput_8"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_216",
+                    "type": "double",
+                    "input_data": {
+                        "var": "AnalogInput_9"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_217",
+                    "type": "double",
+                    "input_data": {
+                        "var": "AnalogInput_10"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_218",
+                    "type": "double",
+                    "input_data": {
+                        "var": "AnalogInput_11"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_223",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ActualPosition_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_224",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ActualPosition_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_225",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ActualPosition_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_234",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ActualPressure_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_235",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ActualPressure_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_236",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ActualPressure_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_237",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ActualPressure_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_238",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ActualPressure_4"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_242",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ProportionalValve_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_243",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ProportionalValve_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_244",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ProportionalValve_2"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_245",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ProportionalValve_3"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_246",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ProportionalValve_4"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_247",
+                    "type": "double",
+                    "input_data": {
+                        "var": "ProportionalValve_5"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_258",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Set_Speed_0"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_259",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Set_Speed_1"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "var_260",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Set_Speed_2"
+                    },
+                    "used_func": "doNothing"
+                }
+            ]
+        },
+        {
+            "input_id": 2,
+            "name": "rawData50",
+            "mapping_file": null,
+            "first_write": false,
+            "update": 0.1,
+            "breakers": [],
+            "datapoint": []
+        },
+        {
+            "input_id": 3,
+            "name": "rawData20",
+            "mapping_file": null,
+            "first_write": false,
+            "update": 0.1,
+            "breakers": [],
+            "datapoint": []
+        },
+        {
+            "input_id": 1,
+            "name": "aggrData",
+            "mapping_file": null,
+            "first_write": false,
+            "update": 300,
+            "breakers": [],
+            "datapoint": []
+        },
+        {
+            "input_id": 1,
+            "name": "stateTransition",
+            "mapping_file": null,
+            "first_write": false,
+            "update": 60,
+            "breakers": [],
+            "datapoint": []
+        },
+        {
+            "input_id": 1,
+            "name": "historyCycle",
+            "mapping_file": null,
+            "first_write": false,
+            "update": "never",
+            "breakers": [],
+            "datapoint": []
+        },
+        {
+            "input_id": 1,
+            "name": "historyParams",
+            "mapping_file": null,
+            "first_write": false,
+            "update": {
+                "write_if_up": {
+                    "update_kind": 0,
+                    "bool_name": "activeParams.paramsResume"
+                }
+            },
+            "breakers": [],
+            "datapoint": []
+        },
+        {
+            "input_id": 1,
+            "name": "activeParams",
+            "mapping_file": null,
+            "first_write": true,
+            "update": "on_var",
+            "breakers": [],
+            "datapoint": []
+        },
+        {
+            "input_id": 1,
+            "name": "rawDataParams",
+            "mapping_file": null,
+            "first_write": true,
+            "update": "never",
+            "breakers": [],
+            "datapoint": [
+                {
+                    "name": "param_0",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Press_Set_Billet_Length"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "param_1",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Set_ButtEnd_Length"
+                    },
+                    "used_func": "doNothing"
+                },
+                {
+                    "name": "param_2",
+                    "type": "double",
+                    "input_data": {
+                        "var": "Set_Extrusion_Speed"
+                    },
+                    "used_func": "doNothing"
+                }
+            ]
+        },
+        {
+            "input_id": 1,
+            "name": "activeAlarms",
+            "mapping_file": null,
+            "first_write": true,
+            "update": "on_var",
+            "breakers": [],
+            "datapoint": [
+                {
+                    "name": "alarmsResume",
+                    "type": "bool",
+                    "input_data": {
+                        "path_keyarg": "activeAlarms/activeAlarms.json",
+                        "pathcopy_keyarg": "mind/activeAlarms.json.tmp",
+                        "states_keyarg": null,
+                        "alarm_10": "Alarms_0_1_1",
+                        "alarm_11": "Alarms_0_1_2",
+                        "alarm_12": "Alarms_0_1_3",
+                        "alarm_13": "Alarms_0_1_4",
+                        "alarm_14": "Alarms_0_1_5",
+                        "alarm_15": "Alarms_0_1_6",
+                        "alarm_16": "Alarms_0_1_7",
+                        "alarm_19": "Alarms_1_0_1",
+                        "alarm_20": "Alarms_1_0_2",
+                        "alarm_21": "Alarms_1_0_3",
+                        "alarm_22": "Alarms_1_0_4",
+                        "alarm_23": "Alarms_1_0_5",
+                        "alarm_24": "Alarms_1_0_6",
+                        "alarm_25": "Alarms_1_0_7",
+                        "alarm_26": "Alarms_1_1_0",
+                        "alarm_27": "Alarms_1_1_1",
+                        "alarm_29": "Alarms_1_1_3",
+                        "alarm_30": "Alarms_1_1_4",
+                        "alarm_31": "Alarms_1_1_5",
+                        "alarm_32": "Alarms_1_1_6",
+                        "alarm_33": "Alarms_1_1_7",
+                        "alarm_35": "Alarms_2_0_0",
+                        "alarm_36": "Alarms_2_0_1",
+                        "alarm_37": "Alarms_2_0_2",
+                        "alarm_41": "Alarms_2_0_6",
+                        "alarm_42": "Alarms_2_0_7",
+                        "alarm_43": "Alarms_2_1_0",
+                        "alarm_44": "Alarms_2_1_1",
+                        "alarm_49": "Alarms_2_1_6",
+                        "alarm_50": "Alarms_2_1_7",
+                        "alarm_52": "Alarms_3_0_0",
+                        "alarm_53": "Alarms_3_0_1",
+                        "alarm_54": "Alarms_3_0_2",
+                        "alarm_59": "Alarms_3_0_7",
+                        "alarm_60": "Alarms_3_1_0",
+                        "alarm_61": "Alarms_3_1_1",
+                        "alarm_62": "Alarms_3_1_2",
+                        "alarm_69": "Alarms_4_0_0",
+                        "alarm_86": "Alarms_5_0_0",
+                        "alarm_87": "Alarms_5_0_1",
+                        "alarm_88": "Alarms_5_0_2",
+                        "alarm_89": "Alarms_5_0_3",
+                        "alarm_90": "Alarms_5_0_4",
+                        "alarm_91": "Alarms_5_0_5",
+                        "alarm_92": "Alarms_5_0_6",
+                        "alarm_93": "Alarms_5_0_7",
+                        "alarm_94": "Alarms_5_1_0",
+                        "alarm_103": "Alarms_6_0_0",
+                        "alarm_104": "Alarms_6_0_1",
+                        "alarm_105": "Alarms_6_0_2",
+                        "alarm_106": "Alarms_6_0_3",
+                        "alarm_113": "Alarms_6_1_2",
+                        "alarm_114": "Alarms_6_1_3",
+                        "alarm_115": "Alarms_6_1_4",
+                        "alarm_116": "Alarms_6_1_5",
+                        "alarm_117": "Alarms_6_1_6",
+                        "alarm_118": "Alarms_6_1_7",
+                        "alarm_120": "Alarms_7_0_0",
+                        "alarm_121": "Alarms_7_0_1",
+                        "alarm_122": "Alarms_7_0_2",
+                        "alarm_123": "Alarms_7_0_3",
+                        "alarm_124": "Alarms_7_0_4",
+                        "alarm_125": "Alarms_7_0_5",
+                        "alarm_126": "Alarms_7_0_6",
+                        "alarm_128": "Alarms_7_1_0",
+                        "alarm_129": "Alarms_7_1_1",
+                        "alarm_137": "Alarms_8_0_0",
+                        "alarm_138": "Alarms_8_0_1",
+                        "alarm_139": "Alarms_8_0_2",
+                        "alarm_140": "Alarms_8_0_3",
+                        "alarm_141": "Alarms_8_0_4",
+                        "alarm_142": "Alarms_8_0_5",
+                        "alarm_143": "Alarms_8_0_6",
+                        "alarm_144": "Alarms_8_0_7",
+                        "alarm_145": "Alarms_8_1_0",
+                        "alarm_146": "Alarms_8_1_1",
+                        "alarm_147": "Alarms_8_1_2",
+                        "alarm_148": "Alarms_8_1_3",
+                        "alarm_149": "Alarms_8_1_4",
+                        "alarm_150": "Alarms_8_1_5",
+                        "alarm_151": "Alarms_8_1_6",
+                        "alarm_152": "Alarms_8_1_7",
+                        "alarm_154": "Alarms_9_0_0",
+                        "alarm_171": "Alarms_10_0_0",
+                        "alarm_188": "Alarms_11_0_0",
+                        "alarm_189": "Alarms_11_0_1",
+                        "alarm_190": "Alarms_11_0_2",
+                        "alarm_191": "Alarms_11_0_3",
+                        "alarm_194": "Alarms_11_0_6",
+                        "alarm_198": "Alarms_11_1_2",
+                        "alarm_231": "Alarms_13_1_1",
+                        "alarm_232": "Alarms_13_1_2",
+                        "alarm_235": "Alarms_13_1_5",
+                        "alarm_236": "Alarms_13_1_6",
+                        "alarm_239": "Alarms_14_0_0",
+                        "alarm_243": "Alarms_14_0_4",
+                        "alarm_249": "Alarms_14_1_2",
+                        "alarm_250": "Alarms_14_1_3",
+                        "alarm_256": "Alarms_15_0_0",
+                        "alarm_274": "Alarms_17_0_0",
+                        "alarm_275": "Alarms_17_0_1",
+                        "alarm_276": "Alarms_17_0_2",
+                        "alarm_278": "Alarms_17_0_4",
+                        "alarm_279": "Alarms_17_0_5",
+                        "alarm_281": "Alarms_17_0_7",
+                        "alarm_282": "Alarms_17_1_0",
+                        "alarm_283": "Alarms_17_1_1",
+                        "alarm_284": "Alarms_17_1_2",
+                        "alarm_285": "Alarms_17_1_3",
+                        "alarm_286": "Alarms_17_1_4",
+                        "alarm_287": "Alarms_17_1_5",
+                        "alarm_288": "Alarms_17_1_6",
+                        "alarm_293": "Alarms_19_0_1",
+                        "alarm_298": "Alarms_19_0_6",
+                        "alarm_309": "Alarms_20_0_0",
+                        "alarm_310": "Alarms_20_0_1",
+                        "alarm_313": "Alarms_20_0_4",
+                        "alarm_314": "Alarms_20_0_5",
+                        "alarm_316": "Alarms_20_0_7",
+                        "alarm_317": "Alarms_20_1_0",
+                        "alarm_318": "Alarms_20_1_1",
+                        "alarm_319": "Alarms_20_1_2",
+                        "alarm_320": "Alarms_20_1_3",
+                        "alarm_321": "Alarms_20_1_4",
+                        "alarm_322": "Alarms_20_1_5",
+                        "alarm_326": "Alarms_21_0_0",
+                        "alarm_327": "Alarms_21_0_1",
+                        "alarm_328": "Alarms_21_0_2",
+                        "alarm_331": "Alarms_21_0_5",
+                        "alarm_333": "Alarms_21_0_7",
+                        "alarm_334": "Alarms_21_1_0",
+                        "alarm_335": "Alarms_21_1_1",
+                        "alarm_336": "Alarms_21_1_2",
+                        "alarm_338": "Alarms_21_1_4",
+                        "alarm_339": "Alarms_21_1_5",
+                        "alarm_340": "Alarms_21_1_6",
+                        "alarm_341": "Alarms_21_1_7",
+                        "alarm_345": "Alarms_23_0_1",
+                        "alarm_348": "Alarms_23_0_4",
+                        "alarm_349": "Alarms_23_0_5",
+                        "alarm_352": "Alarms_23_1_0",
+                        "alarm_353": "Alarms_23_1_1",
+                        "alarm_354": "Alarms_23_1_2",
+                        "alarm_355": "Alarms_23_1_3",
+                        "alarm_356": "Alarms_23_1_4",
+                        "alarm_362": "Alarms_24_0_1",
+                        "alarm_363": "Alarms_24_0_2",
+                        "alarm_364": "Alarms_24_0_3",
+                        "alarm_365": "Alarms_24_0_4",
+                        "alarm_366": "Alarms_24_0_5",
+                        "alarm_367": "Alarms_24_0_6",
+                        "alarm_378": "Alarms_25_0_0",
+                        "alarm_379": "Alarms_25_0_1",
+                        "alarm_380": "Alarms_25_0_2",
+                        "alarm_381": "Alarms_25_0_3",
+                        "alarm_383": "Alarms_25_0_5",
+                        "alarm_384": "Alarms_25_0_6",
+                        "alarm_385": "Alarms_25_0_7",
+                        "alarm_386": "Alarms_25_1_0",
+                        "alarm_395": "Alarms_26_0_0",
+                        "alarm_396": "Alarms_26_0_1",
+                        "alarm_399": "Alarms_26_0_4",
+                        "alarm_400": "Alarms_26_0_5",
+                        "alarm_401": "Alarms_26_0_6",
+                        "alarm_402": "Alarms_26_0_7",
+                        "alarm_409": "Alarms_26_1_6",
+                        "alarm_410": "Alarms_26_1_7",
+                        "alarm_413": "Alarms_27_0_1",
+                        "alarm_414": "Alarms_27_0_2",
+                        "alarm_416": "Alarms_27_0_4",
+                        "alarm_417": "Alarms_27_0_5",
+                        "alarm_429": "Alarms_28_0_0",
+                        "alarm_430": "Alarms_28_0_1",
+                        "alarm_431": "Alarms_28_0_2",
+                        "alarm_432": "Alarms_28_0_3",
+                        "alarm_433": "Alarms_28_0_4",
+                        "alarm_434": "Alarms_28_0_5",
+                        "alarm_435": "Alarms_28_0_6",
+                        "alarm_436": "Alarms_28_0_7",
+                        "alarm_439": "Alarms_28_1_2",
+                        "alarm_441": "Alarms_28_1_4",
+                        "alarm_446": "Alarms_29_0_0",
+                        "alarm_447": "Alarms_29_0_1",
+                        "alarm_450": "Alarms_29_0_4",
+                        "alarm_451": "Alarms_29_0_5",
+                        "alarm_452": "Alarms_29_0_6",
+                        "alarm_453": "Alarms_29_0_7",
+                        "alarm_455": "Alarms_29_1_1",
+                        "alarm_456": "Alarms_29_1_2",
+                        "alarm_463": "Alarms_30_0_0",
+                        "alarm_464": "Alarms_30_0_1",
+                        "alarm_467": "Alarms_30_0_4",
+                        "alarm_468": "Alarms_30_0_5",
+                        "alarm_471": "Alarms_30_1_0",
+                        "alarm_472": "Alarms_30_1_1",
+                        "alarm_473": "Alarms_30_1_2",
+                        "alarm_480": "Alarms_31_0_0",
+                        "alarm_481": "Alarms_31_0_1",
+                        "alarm_482": "Alarms_31_0_2",
+                        "alarm_483": "Alarms_31_0_3",
+                        "alarm_484": "Alarms_31_0_4",
+                        "alarm_489": "Alarms_31_1_1",
+                        "alarm_490": "Alarms_31_1_2",
+                        "alarm_491": "Alarms_31_1_3",
+                        "alarm_492": "Alarms_31_1_4",
+                        "alarm_493": "Alarms_31_1_5",
+                        "alarm_494": "Alarms_31_1_6",
+                        "alarm_495": "Alarms_31_1_7",
+                        "alarm_497": "Alarms_32_0_0",
+                        "alarm_498": "Alarms_32_0_1",
+                        "alarm_499": "Alarms_32_0_2",
+                        "alarm_500": "Alarms_32_0_3",
+                        "alarm_501": "Alarms_32_0_4",
+                        "alarm_502": "Alarms_32_0_5",
+                        "alarm_503": "Alarms_32_0_6",
+                        "alarm_504": "Alarms_32_0_7",
+                        "alarm_505": "Alarms_32_1_0",
+                        "alarm_506": "Alarms_32_1_1",
+                        "alarm_508": "Alarms_32_1_3",
+                        "alarm_509": "Alarms_32_1_4",
+                        "alarm_510": "Alarms_32_1_5",
+                        "alarm_511": "Alarms_32_1_6",
+                        "alarm_512": "Alarms_32_1_7",
+                        "alarm_514": "Alarms_33_0_0",
+                        "alarm_515": "Alarms_33_0_1",
+                        "alarm_516": "Alarms_33_0_2",
+                        "alarm_517": "Alarms_33_0_3",
+                        "alarm_518": "Alarms_33_0_4",
+                        "alarm_519": "Alarms_33_0_5",
+                        "alarm_520": "Alarms_33_0_6",
+                        "alarm_521": "Alarms_33_0_7",
+                        "alarm_522": "Alarms_33_1_0",
+                        "alarm_523": "Alarms_33_1_1",
+                        "alarm_524": "Alarms_33_1_2",
+                        "alarm_525": "Alarms_33_1_3",
+                        "alarm_526": "Alarms_33_1_4",
+                        "alarm_527": "Alarms_33_1_5",
+                        "alarm_529": "Alarms_33_1_7",
+                        "alarm_531": "Alarms_34_0_0",
+                        "alarm_532": "Alarms_34_0_1",
+                        "alarm_533": "Alarms_34_0_2",
+                        "alarm_535": "Alarms_34_0_4",
+                        "alarm_536": "Alarms_34_0_5",
+                        "alarm_537": "Alarms_34_0_6",
+                        "alarm_539": "Alarms_34_1_0",
+                        "alarm_548": "Alarms_35_0_0",
+                        "alarm_575": "Alarms_36_1_2",
+                        "alarm_582": "Alarms_37_0_0",
+                        "alarm_583": "Alarms_37_0_1",
+                        "alarm_584": "Alarms_37_0_2",
+                        "alarm_585": "Alarms_37_0_3",
+                        "alarm_586": "Alarms_37_0_4",
+                        "alarm_590": "Alarms_37_1_0",
+                        "alarm_591": "Alarms_37_1_1",
+                        "alarm_602": "Alarms_38_0_3",
+                        "alarm_616": "Alarms_39_0_0",
+                        "alarm_617": "Alarms_39_0_1",
+                        "alarm_618": "Alarms_39_0_2",
+                        "alarm_622": "Alarms_39_0_6",
+                        "alarm_623": "Alarms_39_0_7",
+                        "alarm_628": "Alarms_39_1_4",
+                        "alarm_629": "Alarms_39_1_5",
+                        "alarm_630": "Alarms_39_1_6",
+                        "alarm_633": "Alarms_40_0_0",
+                        "alarm_634": "Alarms_40_0_1",
+                        "alarm_635": "Alarms_40_0_2",
+                        "alarm_636": "Alarms_40_0_3",
+                        "alarm_637": "Alarms_40_0_4",
+                        "alarm_638": "Alarms_40_0_5",
+                        "alarm_640": "Alarms_40_0_7",
+                        "alarm_641": "Alarms_40_1_0",
+                        "alarm_642": "Alarms_40_1_1",
+                        "alarm_643": "Alarms_40_1_2",
+                        "alarm_644": "Alarms_40_1_3",
+                        "alarm_645": "Alarms_40_1_4",
+                        "alarm_667": "Alarms_42_0_0",
+                        "alarm_668": "Alarms_42_0_1",
+                        "alarm_671": "Alarms_42_0_4",
+                        "alarm_672": "Alarms_42_0_5",
+                        "alarm_674": "Alarms_42_0_7",
+                        "alarm_676": "Alarms_42_1_1",
+                        "alarm_677": "Alarms_42_1_2",
+                        "alarm_678": "Alarms_42_1_3",
+                        "alarm_679": "Alarms_42_1_4",
+                        "alarm_680": "Alarms_42_1_5",
+                        "alarm_681": "Alarms_42_1_6",
+                        "alarm_682": "Alarms_42_1_7",
+                        "alarm_684": "Alarms_43_0_0",
+                        "alarm_685": "Alarms_43_0_1",
+                        "alarm_688": "Alarms_43_0_4",
+                        "alarm_689": "Alarms_43_0_5",
+                        "alarm_691": "Alarms_43_0_7",
+                        "alarm_693": "Alarms_43_1_1",
+                        "alarm_694": "Alarms_43_1_2",
+                        "alarm_695": "Alarms_43_1_3",
+                        "alarm_696": "Alarms_43_1_4",
+                        "alarm_697": "Alarms_43_1_5",
+                        "alarm_698": "Alarms_43_1_6",
+                        "alarm_699": "Alarms_43_1_7",
+                        "alarm_701": "Alarms_44_0_0",
+                        "alarm_702": "Alarms_44_0_1",
+                        "alarm_705": "Alarms_44_0_4",
+                        "alarm_706": "Alarms_44_0_5",
+                        "alarm_708": "Alarms_44_0_7",
+                        "alarm_710": "Alarms_44_1_1",
+                        "alarm_711": "Alarms_44_1_2",
+                        "alarm_712": "Alarms_44_1_3",
+                        "alarm_713": "Alarms_44_1_4",
+                        "alarm_714": "Alarms_44_1_5",
+                        "alarm_715": "Alarms_44_1_6",
+                        "alarm_716": "Alarms_44_1_7",
+                        "alarm_718": "Alarms_45_0_0",
+                        "alarm_719": "Alarms_45_0_1",
+                        "alarm_722": "Alarms_45_0_4",
+                        "alarm_723": "Alarms_45_0_5",
+                        "alarm_725": "Alarms_45_0_7",
+                        "alarm_727": "Alarms_45_1_1",
+                        "alarm_728": "Alarms_45_1_2",
+                        "alarm_729": "Alarms_45_1_3",
+                        "alarm_730": "Alarms_45_1_4",
+                        "alarm_731": "Alarms_45_1_5",
+                        "alarm_732": "Alarms_45_1_6",
+                        "alarm_733": "Alarms_45_1_7",
+                        "alarm_739": "Alarms_50_0_0",
+                        "alarm_740": "Alarms_50_0_1",
+                        "alarm_742": "Alarms_50_0_3",
+                        "alarm_743": "Alarms_50_0_4",
+                        "alarm_749": "Alarms_50_1_2",
+                        "alarm_750": "Alarms_50_1_3",
+                        "alarm_751": "Alarms_50_1_4",
+                        "alarm_752": "Alarms_50_1_5",
+                        "alarm_753": "Alarms_50_1_6",
+                        "alarm_754": "Alarms_50_1_7",
+                        "alarm_756": "Alarms_51_0_0",
+                        "alarm_757": "Alarms_51_0_1",
+                        "alarm_758": "Alarms_51_0_2",
+                        "alarm_759": "Alarms_51_0_3",
+                        "alarm_760": "Alarms_51_0_4",
+                        "alarm_761": "Alarms_51_0_5",
+                        "alarm_762": "Alarms_51_0_6",
+                        "alarm_763": "Alarms_51_0_7",
+                        "alarm_764": "Alarms_51_1_0",
+                        "alarm_765": "Alarms_51_1_1",
+                        "alarm_766": "Alarms_51_1_2",
+                        "alarm_767": "Alarms_51_1_3",
+                        "alarm_768": "Alarms_51_1_4",
+                        "alarm_769": "Alarms_51_1_5",
+                        "alarm_770": "Alarms_51_1_6",
+                        "alarm_771": "Alarms_51_1_7",
+                        "alarm_775": "Alarms_52_0_2",
+                        "alarm_776": "Alarms_52_0_3",
+                        "alarm_777": "Alarms_52_0_4",
+                        "alarm_778": "Alarms_52_0_5",
+                        "alarm_779": "Alarms_52_0_6",
+                        "alarm_780": "Alarms_52_0_7",
+                        "alarm_781": "Alarms_52_1_0",
+                        "alarm_782": "Alarms_52_1_1",
+                        "alarm_783": "Alarms_52_1_2",
+                        "alarm_784": "Alarms_52_1_3",
+                        "alarm_786": "Alarms_52_1_5",
+                        "alarm_790": "Alarms_53_0_0",
+                        "alarm_791": "Alarms_53_0_1",
+                        "alarm_792": "Alarms_53_0_2",
+                        "alarm_793": "Alarms_53_0_3",
+                        "alarm_794": "Alarms_53_0_4",
+                        "alarm_796": "Alarms_53_0_6",
+                        "alarm_797": "Alarms_53_0_7",
+                        "alarm_798": "Alarms_53_1_0",
+                        "alarm_799": "Alarms_53_1_1",
+                        "alarm_808": "Alarms_54_0_1",
+                        "alarm_809": "Alarms_54_0_2",
+                        "alarm_810": "Alarms_54_0_3",
+                        "alarm_811": "Alarms_54_0_4",
+                        "alarm_815": "Alarms_54_1_0",
+                        "alarm_819": "Alarms_54_1_4"
+                    },
+                    "used_func": "activeAlarmEdge"
+                }
+            ]
+        },
+        {
+            "input_id": 1,
+            "name": "historyAlarm",
+            "mapping_file": null,
+            "first_write": false,
+            "update": {
+                "write_if_up": {
+                    "update_kind": 0,
+                    "bool_name": "activeAlarms.alarmsResume"
+                }
+            },
+            "breakers": [],
+            "datapoint": []
+        }
+    ],
+    "general_param": {
+        "output_frequency": 5,
+        "init_string": "",
+        "generate_number_mapping": false,
+        "truncate_len": 56,
+        "log_info": "info",
+        "verbose": true,
+        "equalizer": false,
+        "dummyPickle": {
+            "active": false,
+            "destination": "mind/rawPickles/",
+            "hourPeriod": 24
+        },
+        "persistence": {
+            "active": false,
+            "period": 120,
+            "folder_path": "persistence",
+            "time_tollerance": 7200
+        }
+    }
+}
