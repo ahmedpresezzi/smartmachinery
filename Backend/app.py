@@ -298,6 +298,25 @@ async def handle_get_excels(request):
         files = [f for f in os.listdir(UPLOADS_DIR) if f.endswith(('.xlsx', '.xls'))]
     return web.json_response(files)
 
+async def handle_delete_excel(request):
+    try:
+        data = await request.json()
+        filename = data.get('filename')
+        if not filename: return web.json_response({'success': False, 'message': 'Nome file mancante'}, status=400)
+        
+        filename = os.path.basename(filename)
+        file_path = os.path.join(UPLOADS_DIR, filename)
+        
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            print(f"🗑️ File eliminato: {filename}")
+            # Broadcast update
+            await broadcast({'type': 'excels_updated'})
+            return web.json_response({'success': True})
+        return web.json_response({'success': False, 'message': 'File non trovato'}, status=404)
+    except Exception as e:
+        return web.json_response({'success': False, 'message': str(e)}, status=500)
+
 async def handle_serve_excel(request):
     filename = request.match_info['filename']
     file_path = os.path.join(UPLOADS_DIR, filename)
@@ -564,6 +583,7 @@ async def start_webserver():
     app.router.add_post('/api/save-assets', handle_save_assets)
     app.router.add_post('/api/upload-excel', handle_upload_excel)
     app.router.add_get('/api/get-excels', handle_get_excels)
+    app.router.add_post('/api/delete-excel', handle_delete_excel)
     app.router.add_get('/api/excel/{filename}', handle_serve_excel)
 
     app.router.add_post('/api/request-perms', handle_request_perms)

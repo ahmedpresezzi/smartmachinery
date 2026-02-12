@@ -321,6 +321,21 @@ async function loadExcelsFromBackend() {
         const response = await fetch(`${BACKEND_BASE}/api/get-excels`);
         const fileNames = await response.json();
 
+        // Rimuoviamo i file locali che non sono più sul server (Delezioni)
+        const localFiles = Object.keys(excelFiles);
+        localFiles.forEach(name => {
+            if (!fileNames.includes(name)) {
+                console.log(`[STORAGE] Rimosso file eliminato: ${name}`);
+                delete excelFiles[name];
+                if (selectedFileName === name) {
+                    selectedFileName = null;
+                    excelViewer.style.display = 'none';
+                    fileControls.style.display = 'none';
+                }
+            }
+        });
+
+        // Aggiungiamo i nuovi file
         for (const fileName of fileNames) {
             // Se il file è già presente saltiamo per velocità (tempo reale)
             if (excelFiles[fileName]) continue;
@@ -1028,13 +1043,13 @@ function initDashboardElements() {
             excelToDelete = null;
         });
 
-        modalConfirmButton.addEventListener('click', function () {
+        modalConfirmButton.addEventListener('click', async function () {
             if (selectedBoxId) {
                 deleteBox(selectedBoxId);
                 deleteModalOverlay.style.display = 'none';
                 selectedBoxId = null;
             } else if (excelToDelete) {
-                performExcelDeletion(excelToDelete);
+                await performExcelDeletion(excelToDelete);
                 deleteModalOverlay.style.display = 'none';
                 excelToDelete = null;
             }
@@ -4467,20 +4482,34 @@ deleteExcelButton.addEventListener('click', function () {
     deleteModalOverlay.style.display = 'flex';
 });
 
-function performExcelDeletion(fileName) {
+async function performExcelDeletion(fileName) {
     if (!excelFiles[fileName]) return;
 
-    delete excelFiles[fileName];
+    try {
+        const response = await fetch(`${BACKEND_BASE}/api/delete-excel`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: fileName })
+        });
 
-    if (selectedFileName === fileName) {
-        selectedFileName = null;
-        selectedSheetName = null;
-        excelViewer.style.display = 'none';
-        excelSheetSelectorBottom.style.display = 'none';
-        fileControls.style.display = 'none';
+        if (response.ok) {
+            delete excelFiles[fileName];
+            if (selectedFileName === fileName) {
+                selectedFileName = null;
+                selectedSheetName = null;
+                excelViewer.style.display = 'none';
+                excelSheetSelectorBottom.style.display = 'none';
+                fileControls.style.display = 'none';
+            }
+            updateFilesList();
+            addSystemLog('warning', `File rimosso: ${fileName}`);
+        } else {
+            showInternalAlert("Errore durante l'eliminazione sul server.");
+        }
+    } catch (e) {
+        console.error("Errore delete excel:", e);
+        showInternalAlert("Errore di rete durante l'eliminazione.");
     }
-
-    updateFilesList();
 }
 
 
