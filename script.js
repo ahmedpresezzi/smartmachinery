@@ -53,7 +53,7 @@ let listAllButton = null;
 
 // --- Unified Backend Config ---
 // SE USI GITHUB PAGES: Inserisci qui l'URL del tuo servizio Render (es: 'https://smartmachinery.onrender.com')
-const RENDER_URL = 'https://smartmachinery.onrender.com';
+const RENDER_URL = 'https://smartmachinery-1.onrender.com';
 
 const BACKEND_BASE = (window.location.hostname === 'localhost')
     ? (window.location.port === '5001' ? '' : 'http://localhost:5001')
