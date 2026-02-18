@@ -1793,9 +1793,58 @@ async function runBSWConfigWizard(item, silent = false) {
             { "input_id": 1, "name": "utils", "mapping_file": null, "first_write": false, "update": "never", "breakers": [], "datapoint": [] }
         ];
 
+        // Helper to extract datapoints from Excel
+        function getDatapointsFromExcel(freqStr) {
+            const datapoints = [];
+            let varIndex = 0;
+            const patterns = (freqStr === '500') ? ['process_data', '500ms'] : [`${freqStr}ms`];
+
+            patterns.forEach(pattern => {
+                const sheet = (box.sheets || []).find(s => {
+                    const ln = s.name.toLowerCase().replace(/[\s_]/g, '');
+                    const lp = pattern.toLowerCase().replace(/[\s_]/g, '');
+                    return ln.includes(lp) || ln === lp;
+                });
+
+                if (sheet && sheet.data) {
+                    const ci = sheet.colIndices || {};
+                    const idxNome = ci.customName !== -1 ? ci.customName : -1;
+                    const idxTag = ci.tag !== -1 ? ci.tag : -1;
+                    const idxIt = ci.it !== -1 ? ci.it : -1;
+                    const idxEn = ci.en !== -1 ? ci.en : -1;
+
+                    // Row 0 is header
+                    for (let i = 1; i < sheet.data.length; i++) {
+                        const row = sheet.data[i];
+                        if (!row) {
+                            varIndex++;
+                            continue;
+                        }
+
+                        const nome = (idxNome !== -1 && row[idxNome]) ? String(row[idxNome]).trim() : "";
+                        const tagId = (idxTag !== -1 && row[idxTag]) ? String(row[idxTag]).trim() : "";
+                        const it = (idxIt !== -1 && row[idxIt]) ? String(row[idxIt]).trim() : "";
+                        const en = (idxEn !== -1 && row[idxEn]) ? String(row[idxEn]).trim() : "";
+
+                        const isValid = nome && tagId && (it || en);
+
+                        if (isValid) {
+                            datapoints.push({
+                                "name": `var_${varIndex}`,
+                                "type": "double",
+                                "input_data": { "var": nome },
+                                "used_func": "doNothing"
+                            });
+                        }
+                        varIndex++;
+                    }
+                }
+            });
+            return datapoints;
+        }
+
         plcConfigsInfo.forEach((info, idx) => {
             const plcConfig = info.config;
-            const profile = info.profile;
             const inputId = idx + 1;
 
             if (!plcConfig.devices || !plcConfig.devices[0]) return;
@@ -1809,26 +1858,11 @@ async function runBSWConfigWizard(item, silent = false) {
             if (!validAspectFreqs.includes(freq)) return;
 
             const isHighFreq = (freq === '50' || freq === '20');
-            const updateTime = isHighFreq ? 0 : (parseInt(freq) / 1000.0);
+            // User requested 0.1 update for all these aspects
+            const updateTime = 0.1;
 
-            // Build datapoint array from profile
-            let datapoint = [];
-            if (!isHighFreq && profile && profile.paramProfile) {
-                datapoint = profile.paramProfile.map((p, i) => {
-                    // Type mapping
-                    let type = "double";
-                    const pType = String(p.type).toUpperCase();
-                    if (pType.includes("STRING")) type = "string";
-                    if (pType.includes("BOOL")) type = "bool";
-
-                    return {
-                        "name": `var_${i}`,
-                        "type": type,
-                        "input_data": { "var": p.name || p.tagId },
-                        "used_func": "doNothing"
-                    };
-                });
-            }
+            // Build datapoint array from Excel
+            const datapoint = getDatapointsFromExcel(freq);
 
             bswConfig.aspects.push({
                 "input_id": inputId,
@@ -1840,24 +1874,11 @@ async function runBSWConfigWizard(item, silent = false) {
                 "breakers": [],
                 "datapoint": datapoint
             });
-
-            // Extract distinct params for rawDataParams if applicable
-            // Usually rawDataParams contains settings/recipes etc.
-            // If profile has them distinguished, we could use that.
-            // For now, let's assume we want to put EVERYTHING in rawDataParams IF it's not high freq,
-            // OR if we want a specific subset. 
-            // The template shows rawDataParams having param_0, param_1 etc.
-            // We'll populate rawDataParams with the SAME list as rawDataFreq for now to ensure it's not empty,
-            // or better, if the user had specific profile logic.
-            // Given the user wants "nulla all'interno", likely he wants the PARAMS inside rawDataParams.
         });
 
         // 6b. Prepare Global Params from the first profile found (or aggregation)
         let globalParamsDatapoints = [];
         if (plcConfigsInfo.length > 0 && plcConfigsInfo[0].profile && plcConfigsInfo[0].profile.paramProfile) {
-            // Filter or map params for rawDataParams
-            // Assuming we use the same list for now, or filter by some logic if available
-            // Just mapping all 'double' params or similar
             globalParamsDatapoints = plcConfigsInfo[0].profile.paramProfile.map((p, i) => {
                 let type = "double";
                 const pType = String(p.type).toUpperCase();
@@ -1884,7 +1905,6 @@ async function runBSWConfigWizard(item, silent = false) {
             { "input_id": 1, "name": "activeAlarms", "mapping_file": null, "first_write": true, "update": "on_var", "breakers": [], "datapoint": [{ "name": "alarmsResume", "type": "bool", "input_data": {}, "used_func": "activeAlarmEdge" }] },
             { "input_id": 1, "name": "historyAlarm", "mapping_file": null, "first_write": false, "update": { "write_if_up": { "update_kind": 0, "bool_name": "activeAlarms.alarmsResume" } }, "breakers": [], "datapoint": [] }
         );
-
 
         item.content = JSON.stringify(bswConfig, null, 4);
         if (!silent) showInternalAlert(t('script.bswGenerated'));
