@@ -1796,7 +1796,7 @@ async function runBSWConfigWizard(item, silent = false) {
         // Helper to extract datapoints from Excel
         function getDatapointsFromExcel(freqStr) {
             const datapoints = [];
-            let varIndex = 0;
+            let currentFreqBaseIndex = 0;
             const patterns = (freqStr === '500') ? ['process_data', '500ms'] : [`${freqStr}ms`];
 
             patterns.forEach(pattern => {
@@ -1816,10 +1816,7 @@ async function runBSWConfigWizard(item, silent = false) {
                     // Row 0 is header
                     for (let i = 1; i < sheet.data.length; i++) {
                         const row = sheet.data[i];
-                        if (!row) {
-                            varIndex++;
-                            continue;
-                        }
+                        if (!row) continue;
 
                         const nome = (idxNome !== -1 && row[idxNome]) ? String(row[idxNome]).trim() : "";
                         const tagId = (idxTag !== -1 && row[idxTag]) ? String(row[idxTag]).trim() : "";
@@ -1829,15 +1826,16 @@ async function runBSWConfigWizard(item, silent = false) {
                         const isValid = nome && tagId && (it || en);
 
                         if (isValid) {
+                            const originalIdx = (row._originalIdx !== undefined) ? row._originalIdx : (i - 1);
                             datapoints.push({
-                                "name": `var_${varIndex}`,
+                                "name": `var_${currentFreqBaseIndex + originalIdx}`,
                                 "type": "double",
                                 "input_data": { "var": nome },
                                 "used_func": "doNothing"
                             });
                         }
-                        varIndex++;
                     }
+                    currentFreqBaseIndex += (sheet.rowCount || (sheet.data.length - 1));
                 }
             });
             return datapoints;
@@ -3583,14 +3581,16 @@ function extractCleanData(sheetName, rawData, isSiemens = false) {
             continue;
         }
 
-        // FILTER: Skip if anchor is empty or no translations
-        if (!anchor || !hasTranslations) continue;
-
-        // Keep original row structure for display
-        cleanData.push(row);
+        // Keep original row structure for display. 
+        // We attach the original index (0-based from data start) to the row object.
+        const rowToPush = [...row];
+        rowToPush._originalIdx = i - headerRowIndex - 1;
+        cleanData.push(rowToPush);
     }
 
-    return { cleanData, warnings, invalidRows, hasFunctionalGroup, colIndices };
+    const rowCount = Math.max(0, rawData.length - 1 - headerRowIndex);
+
+    return { cleanData, warnings, invalidRows, hasFunctionalGroup, colIndices, rowCount };
 }
 
 // Gestione del logout
@@ -5619,6 +5619,7 @@ async function performBoxScan(boxId) {
                 validSheets.push({
                     name: sheetName,
                     data: extraction.cleanData,
+                    rowCount: extraction.rowCount, // Total rows including skipped ones
                     colIndices: extraction.colIndices, // Store all indices
                     hasFunctionalGroup: extraction.hasFunctionalGroup
                 });
