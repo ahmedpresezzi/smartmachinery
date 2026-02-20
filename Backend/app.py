@@ -400,6 +400,8 @@ async def handle_delete_excel(request):
             return web.json_response({'success': True})
         return web.json_response({'success': False, 'message': 'File non trovato'}, status=404)
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return web.json_response({'success': False, 'message': str(e)}, status=500)
 
 async def handle_serve_excel(request):
