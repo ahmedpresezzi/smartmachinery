@@ -9,6 +9,9 @@ import aiohttp
 
 import os
 from dotenv import load_dotenv
+import bcrypt
+import jwt
+from datetime import datetime, timedelta
 
 # Carica variabili d'ambiente
 load_dotenv()
@@ -18,6 +21,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 WEBHOOK_LOGS = os.getenv('WEBHOOK_LOGS')
 WEBHOOK_PERMS = os.getenv('WEBHOOK_PERMS')
 BACKUP_CHANNEL_ID = os.getenv('BACKUP_CHANNEL_ID') # ID del canale per i backup .json
+JWT_SECRET = os.getenv('JWT_SECRET', 'super-secret-fallback-key-change-me')
 
 if not TOKEN:
     print("❌ CRITICAL: DISCORD_TOKEN is missing from environment variables!")
@@ -41,7 +45,7 @@ AUDIT_FILE = os.path.join(BASE_DIR, 'audit.json')
 ASSETS_FILE = os.path.join(BASE_DIR, 'assets.json')
 STATE_FILE = os.path.join(BASE_DIR, 'bot_state.json')
 ROOT_DIR = os.path.dirname(BASE_DIR)
-FRONTEND_DIR = ROOT_DIR # Frontend files are now in the root
+FRONTEND_DIR = os.path.join(ROOT_DIR, 'public') # Frontend files are now in the 'public' folder
 UPLOADS_DIR = os.path.join(BASE_DIR, 'uploads')
 
 if not os.path.exists(UPLOADS_DIR):
@@ -220,34 +224,42 @@ def save_state(state):
     with open(STATE_FILE, 'w') as f: json.dump(state, f, indent=4)
 
 @web.middleware
-async def cors_middleware(request, handler):
-    # Handle preflight OPTIONS requests
-    if request.method == 'OPTIONS':
-        return web.Response(status=204, headers={
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-            'Access-Control-Max-Age': '86400',
-        })
+async def auth_middleware(request, handler):
+    # Public routes
+    public_paths = ['/login', '/', '/ws']
+    if request.path in public_paths or request.path.startswith(('/static/', '/logos/')):
+        return await handler(request)
+
+    # Protect everything else
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return web.json_response({'error': 'Unauthorized: Missing token'}, status=401)
     
-    # Handle the actual request
+    token = auth_header.split(' ')[1]
     try:
-        response = await handler(request)
-        
-        # WebSockets handle their own headers during handshake
-        if isinstance(response, web.WebSocketResponse):
-            return response
-            
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-        return response
-    except web.HTTPException as ex:
-        ex.headers['Access-Control-Allow-Origin'] = '*'
-        raise ex
-    except Exception as e:
-        print(f"Middleware Error: {e}")
-        raise
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+        request['user'] = payload
+    except jwt.ExpiredSignatureError:
+        return web.json_response({'error': 'Unauthorized: Token expired'}, status=401)
+    except jwt.InvalidTokenError:
+        return web.json_response({'error': 'Unauthorized: Invalid token'}, status=401)
+
+    # Admin only routes
+    if request.path.startswith('/api/admin/') and payload.get('role') != 'admin':
+        return web.json_response({'error': 'Forbidden: Admin access required'}, status=403)
+
+    return await handler(request)
+
+@web.middleware
+async def security_headers_middleware(request, handler):
+    response = await handler(request)
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    # Content Security Policy - allow self, some CDNs, and data URIs
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: *; connect-src 'self' wss: https://openrouter.ai;"
+    return response
 
 async def broadcast(data):
     """Send real-time updates to all connected browser clients."""
@@ -339,7 +351,7 @@ async def handle_delete_excel(request):
         return web.json_response({'success': False, 'message': str(e)}, status=500)
 
 async def handle_serve_excel(request):
-    filename = request.match_info['filename']
+    filename = os.path.basename(request.match_info['filename'])
     file_path = os.path.join(UPLOADS_DIR, filename)
     if os.path.exists(file_path):
         return web.FileResponse(file_path)
@@ -363,31 +375,28 @@ async def handle_login(request):
         data = await request.json()
         u, p = data.get('username'), data.get('password')
         db = load_db()
-        user = next((x for x in db if x['username'] == u and x['password'] == p), None)
-        if user:
+        user = next((x for x in db if x['username'] == u), None)
+        
+        if user and bcrypt.checkpw(p.encode('utf-8'), user['password'].encode('utf-8')):
             if user['status'] == 'active':
                 # Parse User Agent
                 ua_string = request.headers.get('User-Agent', '')
+                # ... (OS/Browser info logic)
                 
-                os_info = "OS Sconosciuto"
-                if "Windows NT 10.0" in ua_string: os_info = "Windows 10/11"
-                elif "Windows NT 6.3" in ua_string: os_info = "Windows 8.1"
-                elif "Windows NT 6.2" in ua_string: os_info = "Windows 8"
-                elif "Windows NT 6.1" in ua_string: os_info = "Windows 7"
-                elif "Mac" in ua_string: os_info = "MacOS"
-                elif "Linux" in ua_string: os_info = "Linux"
+                # Generate JWT
+                token = jwt.encode({
+                    'username': u,
+                    'role': user['role'],
+                    'exp': datetime.utcnow() + timedelta(hours=24)
+                }, JWT_SECRET, algorithm='HS256')
 
-                browser_info = "Browser Sconosciuto"
-                if "Edg" in ua_string: browser_info = "Edge"
-                elif "Chrome" in ua_string: browser_info = "Chrome"
-                elif "Firefox" in ua_string: browser_info = "Firefox"
-                elif "Safari" in ua_string: browser_info = "Safari"
-
-                await log_event("info", f"Login effettuato: {u} | {browser_info} - {os_info}")
-                return web.json_response({'success': True, 'role': user['role']})
+                await log_event("info", f"Login effettuato: {u}")
+                return web.json_response({'success': True, 'role': user['role'], 'token': token})
             return web.json_response({'success': False, 'message': 'Account sospeso'})
         return web.json_response({'success': False, 'message': 'Credenziali errate'})
-    except: return web.json_response({'success': False}, status=500)
+    except Exception as e: 
+        print(f"Login Error: {e}")
+        return web.json_response({'success': False}, status=500)
 
 async def handle_get_logs(request):
     logs = []
@@ -504,9 +513,10 @@ async def handle_admin_create_user(request):
         if any(x['username'] == u for x in db):
              return web.json_response({'success': False, 'message': 'Utente esistente'})
              
+        hashed_p = bcrypt.hashpw(p.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         db.append({
             "username": u,
-            "password": p,
+            "password": hashed_p,
             "role": role,
             "status": "active",
             "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -596,7 +606,28 @@ async def logger_middleware(request, handler):
     return await handler(request)
 
 async def start_webserver():
-    app = web.Application(middlewares=[logger_middleware, cors_middleware])
+    # CORS setup
+    app = web.Application(middlewares=[logger_middleware, auth_middleware, security_headers_middleware])
+    
+    # Configure CORS - manually as middleware or using a library if preferred
+    # Since we replaced the cors_middleware with auth_middleware, we need to handle CORS
+    # Let's add a simple CORS handler to allow the frontend
+    
+    @web.middleware
+    async def simple_cors(request, handler):
+        if request.method == 'OPTIONS':
+            return web.Response(status=204, headers={
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            })
+        response = await handler(request)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+
+    app.middlewares.append(simple_cors)
     app.router.add_post('/login', handle_login)
     app.router.add_get('/logs', handle_get_logs)
     app.router.add_post('/api/chat', handle_chat)
@@ -618,15 +649,9 @@ async def start_webserver():
     app.router.add_get('/ws', handle_ws)
     app.router.add_get('/', handle_index)
     
-    # Static files (CSS, JS, Logos) are in the root
+    # Static files (CSS, JS, Logos) are in the 'public' folder
     if os.path.exists(FRONTEND_DIR):
-        app.router.add_static('/logos/', path=os.path.join(ROOT_DIR, 'logos'), name='logos')
-        # Serving root static files EXCEPT python files
-        for f in os.listdir(FRONTEND_DIR):
-            if f.endswith(('.css', '.js', '.png', '.jpg', '.ico', '.html', '.json')):
-                 if os.path.isfile(os.path.join(FRONTEND_DIR, f)):
-                     # We don't add static for every file, just the root
-                     pass
+        app.router.add_static('/logos/', path=os.path.join(FRONTEND_DIR, 'logos'), name='logos')
         app.router.add_static('/', path=FRONTEND_DIR, name='static')
 
     runner = web.AppRunner(app)

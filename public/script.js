@@ -61,6 +61,16 @@ const BACKEND_BASE = (window.location.hostname === 'localhost' || window.locatio
 
 console.log("[DEBUG] Backend Base:", BACKEND_BASE);
 const BACKEND_API_URL = `${BACKEND_BASE}/api/chat`;
+let USER_TOKEN = localStorage.getItem('userToken') || null;
+
+function getAuthHeaders(extraHeaders = {}) {
+    const headers = { ...extraHeaders };
+    if (!headers['Content-Type'] && !(extraHeaders instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
+    if (USER_TOKEN) headers['Authorization'] = `Bearer ${USER_TOKEN}`;
+    return headers;
+}
 
 // --- WebSocket Real-Time Sync ---
 let socket = null;
@@ -130,7 +140,13 @@ async function loadAdminUsers() {
     if (!tbody) return;
 
     try {
-        const response = await fetch(`${BACKEND_BASE}/api/admin/users?t=${Date.now()}`);
+        const response = await fetch(`${BACKEND_BASE}/api/admin/users?t=${Date.now()}`, {
+            headers: getAuthHeaders()
+        });
+        if (response.status === 401 || response.status === 403) {
+            handleLogout();
+            return;
+        }
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const users = await response.json();
         if (!Array.isArray(users)) throw new Error("Formato dati non valido");
@@ -157,7 +173,9 @@ async function loadAdminRequests() {
     const list = document.getElementById('adminRequestsList');
     if (!list) return;
     try {
-        const res = await fetch(`${BACKEND_BASE}/api/admin/requests`);
+        const res = await fetch(`${BACKEND_BASE}/api/admin/requests`, {
+            headers: getAuthHeaders()
+        });
         if (!res.ok) return;
         const requests = await res.json();
         const reqArray = Object.entries(requests).map(([user, data]) => ({ user, ...data }));
@@ -195,7 +213,7 @@ function initAdminPanel() {
             try {
                 const res = await fetch(`${BACKEND_BASE}/api/admin/create-user`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({ username: u, password: p, role: r })
                 });
                 if ((await res.json()).success) {
@@ -264,7 +282,7 @@ async function changeUserRole(username, currentRole) {
         try {
             const res = await fetch(`${BACKEND_BASE}/api/admin/update-user`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ username, role: newRole })
             });
             if ((await res.json()).success) {
@@ -283,7 +301,7 @@ async function toggleUserStatus(username, currentStatus) {
         try {
             const res = await fetch(`${BACKEND_BASE}/api/admin/update-user`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ username, status: newStatus })
             });
             if ((await res.json()).success) {
@@ -300,7 +318,7 @@ async function deleteUser(username) {
         try {
             const res = await fetch(`${BACKEND_BASE}/api/admin/delete-user`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ username })
             });
             if ((await res.json()).success) {
@@ -318,7 +336,9 @@ let excelFiles = {}; // {fileName: {file, workbook (ExcelJS), buffer}}
 async function loadExcelsFromBackend() {
     console.log("[STORAGE] Caricamento file excel dal server...");
     try {
-        const response = await fetch(`${BACKEND_BASE}/api/get-excels`);
+        const response = await fetch(`${BACKEND_BASE}/api/get-excels`, {
+            headers: getAuthHeaders()
+        });
         const fileNames = await response.json();
 
         // Rimuoviamo i file locali che non sono più sul server (Delezioni)
@@ -342,7 +362,9 @@ async function loadExcelsFromBackend() {
 
             console.log(`[STORAGE] Recupero file: ${fileName}`);
             try {
-                const fileRes = await fetch(`${BACKEND_BASE}/api/excel/${fileName}`);
+                const fileRes = await fetch(`${BACKEND_BASE}/api/excel/${fileName}`, {
+                    headers: getAuthHeaders()
+                });
                 const blob = await fileRes.blob();
                 const file = new File([blob], fileName);
                 await handleExcelFile(file, false); // false = don't re-upload
@@ -374,7 +396,9 @@ let systemLogs = [];
 // --- Sync Backend Logs ---
 async function syncBackendLogs() {
     try {
-        const response = await fetch(`${BACKEND_BASE}/logs`);
+        const response = await fetch(`${BACKEND_BASE}/logs`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) return;
         const backendLogs = await response.json();
 
@@ -436,6 +460,8 @@ if (loginForm) {
             if (result.success) {
                 currentUsername = username;
                 currentUserRole = result.role;
+                USER_TOKEN = result.token;
+                localStorage.setItem('userToken', USER_TOKEN);
 
                 // Avvia controllo permessi se utente
                 if (currentUserRole === 'user') {
@@ -2566,7 +2592,9 @@ function bindFileManagerEvents() {
 
 async function loadBoxesFromBackend() {
     try {
-        const response = await fetch(`${BACKEND_BASE}/api/get-assets`);
+        const response = await fetch(`${BACKEND_BASE}/api/get-assets`, {
+            headers: getAuthHeaders()
+        });
         const data = await response.json();
         if (Array.isArray(data)) {
             boxes = data;
@@ -2581,7 +2609,7 @@ async function syncBoxesWithBackend() {
     try {
         await fetch(`${BACKEND_BASE}/api/save-assets`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify(boxes)
         });
     } catch (error) {
@@ -3597,6 +3625,8 @@ function extractCleanData(sheetName, rawData, isSiemens = false) {
 function handleLogout() {
     // Il modo più sicuro per pulire TUTTO (event listeners, variabili globali, modal)
     // è ricaricare la pagina. Questo garantisce un ritorno allo stato di login puro.
+    localStorage.removeItem('userToken');
+    USER_TOKEN = null;
     window.location.reload();
 }
 
@@ -3747,8 +3777,11 @@ async function handleExcelFile(file, shouldUpload = true) {
                 if (shouldUpload) {
                     const formData = new FormData();
                     formData.append('file', file);
+                    const headers = {};
+                    if (USER_TOKEN) headers['Authorization'] = `Bearer ${USER_TOKEN}`;
                     fetch(`${BACKEND_BASE}/api/upload-excel`, {
                         method: 'POST',
+                        headers: headers,
                         body: formData
                     }).then(res => res.json())
                         .then(data => console.log("Upload response:", data))
@@ -6206,9 +6239,7 @@ async function callBackendAPI(userMessage) {
 
     const response = await fetch(BACKEND_API_URL, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload)
     });
 
