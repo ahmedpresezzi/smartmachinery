@@ -673,13 +673,7 @@ async def logger_middleware(request, handler):
     return await handler(request)
 
 async def start_webserver():
-    # CORS setup
-    app = web.Application(middlewares=[logger_middleware, auth_middleware, security_headers_middleware])
-    
-    # Configure CORS - manually as middleware or using a library if preferred
-    # Since we replaced the cors_middleware with auth_middleware, we need to handle CORS
-    # Let's add a simple CORS handler to allow the frontend
-    
+    # Define simple_cors middleware first
     @web.middleware
     async def simple_cors(request, handler):
         if request.method == 'OPTIONS':
@@ -687,14 +681,27 @@ async def start_webserver():
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Access-Control-Max-Age': '86400',
             })
-        response = await handler(request)
+        try:
+            response = await handler(request)
+        except web.HTTPException as ex:
+            # Handle common errors to ensure CORS
+            ex.headers['Access-Control-Allow-Origin'] = '*'
+            raise ex
+        except Exception as e:
+            # Fatal error
+            return web.json_response({'error': str(e)}, status=500, headers={'Access-Control-Allow-Origin': '*'})
+            
         response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
         return response
 
-    app.middlewares.append(simple_cors)
+    # CORS setup - must be first to handle errors from other middlewares
+    app = web.Application(middlewares=[simple_cors, logger_middleware, auth_middleware, security_headers_middleware])
+    
+    # ... rest of setup
     app.router.add_post('/login', handle_login)
     app.router.add_get('/api/verify', handle_verify_token)
     app.router.add_get('/logs', handle_get_logs)

@@ -274,11 +274,20 @@ function initAdminPanel() {
                     headers: getAuthHeaders(),
                     body: JSON.stringify({ username: u, password: p, role: r })
                 });
-                if ((await res.json()).success) {
+
+                const data = await res.json();
+                if (data.success) {
                     showInternalAlert(`Utente ${u} creato!`);
                     loadAdminUsers();
+                    document.getElementById('newLicenseUser').value = '';
+                    document.getElementById('newLicensePass').value = '';
+                } else {
+                    showInternalAlert(data.message || "Impossibile creare l'utente.");
                 }
-            } catch (e) { showInternalAlert("Errore."); }
+            } catch (e) {
+                console.error("[ADMIN] Creation Error:", e);
+                showInternalAlert("Errore di connessione o permessi mancanti.");
+            }
             createBtn.disabled = false; createBtn.textContent = "Crea Licenza";
         };
     }
