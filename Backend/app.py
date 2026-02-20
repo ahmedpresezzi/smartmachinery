@@ -649,10 +649,30 @@ async def start_webserver():
     app.router.add_get('/ws', handle_ws)
     app.router.add_get('/', handle_index)
     
-    # Static files (CSS, JS, Logos) are in the 'public' folder
+    # Static files (CSS, JS, Logos)
     if os.path.exists(FRONTEND_DIR):
         app.router.add_static('/logos/', path=os.path.join(FRONTEND_DIR, 'logos'), name='logos')
-        app.router.add_static('/', path=FRONTEND_DIR, name='static')
+        
+        # Instead of serving the whole root, we create a function to serve only allowed files
+        async def safe_static_handler(request):
+            filename = request.match_info.get('filename', 'index.html')
+            if not filename: filename = 'index.html'
+            
+            # Security: prevent path traversal and block sensitive files/dirs
+            if '..' in filename or filename.startswith(('.env', 'Backend', 'private')):
+                return web.Response(status=403)
+                
+            # Allow only common frontend extensions
+            allowed_exts = ('.html', '.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg', '.json', '.txt')
+            if not filename.endswith(allowed_exts):
+                return web.Response(status=403)
+                
+            filepath = os.path.join(FRONTEND_DIR, filename)
+            if os.path.isfile(filepath):
+                return web.FileResponse(filepath)
+            return web.Response(status=404)
+
+        app.router.add_get('/{filename:.*}', safe_static_handler)
 
     runner = web.AppRunner(app)
     await runner.setup()
