@@ -62,29 +62,35 @@ def build():
             )
             run_command(cmd)
 
-    # 3. Minify/Copy CSS
+    # 3. Minify CSS
     for css in CSS_FILES:
         src_path = os.path.join(SRC_DIR, css)
         out_path = os.path.join(OUT_DIR, css)
         if os.path.exists(src_path):
-            print(f"Copying CSS {css}...")
-            shutil.copy2(src_path, out_path)
+            print(f"Minifying CSS {css}...")
+            cmd = f"npx clean-css-cli -o {out_path} {src_path}"
+            run_command(cmd)
 
     # 4. Obfuscate HTML
     for html in HTML_FILES:
         src_path = os.path.join(SRC_DIR, html)
         out_path = os.path.join(OUT_DIR, html)
         if os.path.exists(src_path):
-            print(f"Minifying {html}...")
-            with open(src_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            import re
-            minified = re.sub(r'<!--.*?-->', '', content, flags=re.DOTALL)
-            minified = re.sub(r'>\s+<', '><', minified)
-            
-            with open(out_path, 'w', encoding='utf-8') as f:
-                f.write(minified)
+            print(f"Minifying HTML {html}...")
+            # Advanced HTML Minification removes comments, collapses whitespace, 
+            # minifies inline JS/CSS, and removes optional tags
+            cmd = (
+                f"npx html-minifier-terser {src_path} "
+                f"-o {out_path} "
+                f"--collapse-whitespace "
+                f"--remove-comments "
+                f"--minify-css true "
+                f"--minify-js true "
+                f"--remove-script-type-attributes "
+                f"--remove-style-link-type-attributes "
+                f"--remove-attribute-quotes"
+            )
+            run_command(cmd)
                 
     # 5. Copy extra directories
     for d in COPY_DIRS:
