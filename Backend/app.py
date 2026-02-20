@@ -104,7 +104,18 @@ def save_assets(data):
         asyncio.create_task(backup_to_discord(ASSETS_FILE, "assets.json"))
     except Exception as e: print(f"ERR ASSETS: {e}")
 
+# --- GLOBALS ---
+RESTORE_COMPLETED = False
+
 # --- UTILITIES ---
+async def wait_for_restore():
+    """Wait for the initial Discord restoration to complete if it's still running."""
+    if RESTORE_COMPLETED or not BACKUP_CHANNEL_ID: return
+    print("⏳ API in attesa che il ripristino da Discord completi...")
+    for _ in range(60): # Wait up to 30s
+        if RESTORE_COMPLETED: break
+        await asyncio.sleep(0.5)
+
 def load_db():
     if not os.path.exists(DB_FILE):
         print(f"⚠️ DB Not Found: {DB_FILE}")
@@ -145,26 +156,46 @@ def save_db(data):
 
 async def backup_to_discord(file_path, filename):
     """Sends any file to the backup Discord channel."""
-    if not bot.is_ready() or not BACKUP_CHANNEL_ID: return
+    if not BACKUP_CHANNEL_ID: return
+    
+    # Wait for bot to be ready if it's currently connecting
+    if not bot.is_ready():
+        print(f"⏳ In attesa del bot per il backup di {filename}...")
+        for _ in range(30): # Wait up to 15 seconds
+            if bot.is_ready(): break
+            await asyncio.sleep(0.5)
+            
+    if not bot.is_ready(): 
+        print(f"❌ Backup Error: Bot non pronto dopo l'attesa per {filename}")
+        return
+
     try:
-        channel = bot.get_channel(int(BACKUP_CHANNEL_ID))
+        channel_id = int(BACKUP_CHANNEL_ID)
+        channel = bot.get_channel(channel_id)
+        if not channel:
+            channel = await bot.fetch_channel(channel_id)
+            
         if channel:
             with open(file_path, 'rb') as f:
                 await channel.send(f"📦 Backup: `{filename}`", file=discord.File(f, filename))
+                print(f"✅ Backup Discord completato: {filename}")
+        else:
+            print(f"⚠️ Canale backup non trovato: {channel_id}")
     except Exception as e:
         print(f"❌ Backup Error for {filename}: {e}")
 
 async def restore_from_discord():
     """Recover latest JSON and Excel files from Discord history on startup."""
     if not BACKUP_CHANNEL_ID: return
-    print("📥 Tentativo di ripristino dati da Discord...")
+    print("📥 Tentativo di ripristino dati da Discord (Ricerca negli ultimi 500 messaggi)...")
     try:
         channel = await bot.fetch_channel(int(BACKUP_CHANNEL_ID))
         # Files we definitely want to restore if found
         core_files = ["user.json", "assets.json"]
         found_core = set()
         
-        async for message in channel.history(limit=100):
+        # We look further back to ensure we find the latest core files
+        async for message in channel.history(limit=500):
             if not message.attachments: continue
             for att in message.attachments:
                 # Core files: restore the most recent one (first found in history)
@@ -181,8 +212,12 @@ async def restore_from_discord():
                         await att.save(path)
                         print(f"✅ Ripristinato excel: {att.filename}")
             
-            # Stop if we found all core files (optional, we might want to keep looking for excels)
-            # if len(found_core) == len(core_files): break
+            # If we found all core files, we could continue for excels, but let's be safe
+            if len(found_core) == len(core_files) and any(att.filename.endswith(('.xlsx', '.xls')) for m in [message] for att in m.attachments):
+                # We can stop if we feel we have enough, but for now let's scan all 500
+                pass
+        
+        print(f"🏁 Ripristino completato. Core trovati: {list(found_core)}")
     except Exception as e:
         print(f"❌ Restore Error: {e}")
 
@@ -308,6 +343,7 @@ async def handle_ws(request):
     return ws
 
 async def handle_get_assets(request):
+    await wait_for_restore()
     return web.json_response(load_assets())
 
 async def handle_upload_excel(request):
@@ -337,6 +373,7 @@ async def handle_upload_excel(request):
         return web.json_response({'success': False, 'message': str(e)}, status=500)
 
 async def handle_get_excels(request):
+    await wait_for_restore()
     files = []
     if os.path.exists(UPLOADS_DIR):
         files = [f for f in os.listdir(UPLOADS_DIR) if f.endswith(('.xlsx', '.xls'))]
@@ -387,6 +424,7 @@ async def handle_index(request):
 
 async def handle_login(request):
     try:
+        await wait_for_restore()
         data = await request.json()
         u, p = data.get('username'), data.get('password')
         db = load_db()
@@ -412,6 +450,19 @@ async def handle_login(request):
     except Exception as e: 
         print(f"Login Error: {e}")
         return web.json_response({'success': False}, status=500)
+
+async def handle_verify_token(request):
+    """Verifies a JWT token and returns user info."""
+    # The auth_middleware already verified the token if we get here
+    user = request.get('user')
+    if not user:
+        return web.json_response({'success': False, 'error': 'Invalid token'}, status=401)
+    
+    return web.json_response({
+        'success': True,
+        'username': user.get('username'),
+        'role': user.get('role')
+    })
 
 async def handle_get_logs(request):
     logs = []
@@ -544,6 +595,7 @@ async def handle_admin_create_user(request):
 
 async def handle_admin_get_users(request):
     try:
+        await wait_for_restore()
         db = load_db()
         # Return users without passwords for security
         users = []
@@ -644,6 +696,7 @@ async def start_webserver():
 
     app.middlewares.append(simple_cors)
     app.router.add_post('/login', handle_login)
+    app.router.add_get('/api/verify', handle_verify_token)
     app.router.add_get('/logs', handle_get_logs)
     app.router.add_post('/api/chat', handle_chat)
     app.router.add_get('/api/get-assets', handle_get_assets)
@@ -917,8 +970,13 @@ async def on_app_command_error(interaction: discord.Interaction, error):
 
 @bot.event
 async def on_ready():
+    global RESTORE_COMPLETED
     print(f"✅ Bot Discord Online: {bot.user}")
-    await restore_from_discord() # Recupera i dati prima di procedere
+    try:
+        await restore_from_discord()
+    finally:
+        RESTORE_COMPLETED = True
+    
     await asyncio.sleep(1)
     await update_main_dashboard()
 

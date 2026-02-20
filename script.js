@@ -127,8 +127,66 @@ function initWebSocket() {
         socket.close();
     };
 }
-// Initialize WS
+// --- SESSION & AUTO-LOGIN ---
+async function checkSession() {
+    if (!USER_TOKEN) return;
+    console.log("[AUTH] Checking existing session...");
+
+    try {
+        const response = await fetch(`${BACKEND_BASE}/api/verify`, {
+            headers: getAuthHeaders()
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log("[AUTH] Session valid:", result.username);
+
+            currentUsername = result.username;
+            currentUserRole = result.role;
+
+            // UI Transition to Dashboard
+            const welcomeDashboard = document.getElementById('welcomeDashboard');
+            const mainDashboard = document.getElementById('mainDashboard');
+
+            if (welcomeDashboard && mainDashboard) {
+                welcomeDashboard.classList.add('hidden');
+                mainDashboard.classList.remove('hidden');
+
+                // Fix style if hidden by transition
+                const mainContainer = document.querySelector('.main-container');
+                const header = document.querySelector('.header');
+                if (mainContainer) mainContainer.style.display = 'block';
+                if (header) header.style.display = 'flex';
+
+                // Initialize modules
+                if (typeof initDashboardElements === 'function') initDashboardElements();
+                if (typeof loadBoxesFromBackend === 'function') await loadBoxesFromBackend();
+                if (typeof loadExcelsFromBackend === 'function') await loadExcelsFromBackend();
+
+                // Re-render
+                if (typeof renderBoxes === 'function') renderBoxes();
+                if (typeof updateFilesList === 'function') updateFilesList();
+
+                // Start status check for temp admins
+                if (currentUserRole === 'user' && typeof startPermissionCheck === 'function') {
+                    startPermissionCheck();
+                }
+
+                addSystemLog('success', `Sessione ripristinata: ${currentUsername} (${currentUserRole})`);
+            }
+        } else {
+            console.warn("[AUTH] Session invalid or expired.");
+            localStorage.removeItem('userToken');
+            USER_TOKEN = null;
+        }
+    } catch (e) {
+        console.error("[AUTH] Error during session check:", e);
+    }
+}
+
+// Initialize
 initWebSocket();
+checkSession();
 
 // --- GLOBAL ADMIN FUNCTIONS (Defined early to avoid "is not a function" errors) ---
 let adminPollInterval = null;
