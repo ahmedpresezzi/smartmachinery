@@ -112,7 +112,22 @@ def load_db():
     with open(DB_FILE, 'r', encoding='utf-8') as f:
         try:
             data = json.load(f)
-            # print(f"DEBUG: Loaded {len(data)} users from {DB_FILE}")
+            
+            # Auto-Migration: If any password is not hashed, hash it now
+            migrated = False
+            for user in data:
+                pwd = user.get('password', '')
+                if pwd and not pwd.startswith('$2b$'):
+                    print(f"🔒 Auto-Migrating user '{user['username']}' to Bcrypt...")
+                    hashed = bcrypt.hashpw(pwd.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                    user['password'] = hashed
+                    migrated = True
+            
+            if migrated:
+                with open(DB_FILE, 'w', encoding='utf-8') as fw:
+                    json.dump(data, fw, indent=4)
+                print("✅ Auto-Migration saved to file.")
+                
             return data
         except Exception as e:
             print(f"❌ Error loading DB: {e}")
@@ -729,7 +744,8 @@ class EditFieldModal(discord.ui.Modal):
         for u in db:
             if u['username'] == self.user_target['username']:
                 if self.is_pass:
-                    u['password'] = new_val
+                    hashed_p = bcrypt.hashpw(new_val.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                    u['password'] = hashed_p
                     await log_event("info", f"Password cambiata per {u['username']}")
                 else:
                     old_name = u['username']
@@ -749,7 +765,8 @@ class RegisterModal(discord.ui.Modal, title="✨ Nuova Licenza"):
         db = load_db()
         if any(u['username'] == self.u_in.value for u in db):
             return await interaction.response.send_message("❌ Esiste già!", ephemeral=True)
-        db.append({"username": self.u_in.value, "password": self.p_in.value, "role": "user", "status": "active", "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+        hashed_p = bcrypt.hashpw(self.p_in.value.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        db.append({"username": self.u_in.value, "password": hashed_p, "role": "user", "status": "active", "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
         save_db(db)
         await log_event("success", f"Creata licenza: {self.u_in.value}")
         await interaction.response.send_message(f"✅ Creato: {self.u_in.value}", ephemeral=True)
