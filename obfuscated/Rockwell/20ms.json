@@ -1,0 +1,27 @@
+{
+    "configId": "presezzi",
+    "devices": [
+        {
+            "name": "plc-upstream-20",
+            "profileId": "profile",
+            "driverConfig": {
+                "host": "10.0.14.25",
+                "useAbsoluteArrayIndex": true,
+                "arraysInBuffer": 15,
+                "buffersNumber": 2,
+                "firstBufferOffset": 0,
+                "bufferIndexTagId": "M100_20ms_MachineRecorder.Spare_5",
+                "buffersTagId": "M100_20ms_MachineRecorder_Buffer.Buffer[{array_index}]",
+                "globalTimestampTagId": "PEAK_SetTimeStamp",
+                "timestampTag": "Timestamp"
+            },
+            "pollingTime": 2,
+            "wdtEnabled": true,
+            "wdtLimit": 10000,
+            "redisIndex": 0
+        }
+    ],
+    "publishers": [],
+    "redisHost": "redis",
+    "redisPort": 6379
+}

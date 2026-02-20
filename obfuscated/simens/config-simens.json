@@ -1,0 +1,28 @@
+{
+    "configId": "presezzi",
+    "devices": [
+        {
+            "driverConfig": {
+                "host": "192.168.2.201",
+                "port": 102,
+                "rack": 0,
+                "slot": 1
+            },
+            "id": "factoryedge_profile",
+            "name": "plc-pressa-500",
+            "pollingTime": 500,
+            "profileId": "profile",
+            "protocolName": "S7",
+            "redisIndex": 0,
+            "wdtEnabled": true,
+            "wdtLimit": 30,
+            "deletable": false,
+            "factoryEdgeId": "factoryedge"
+        }
+    ],
+    "factoryEdgeId": "factoryedge",
+    "lastModDate": "21-11-2024T00:00:00Z",
+    "publishers": [],
+    "redisHost": "redis",
+    "redisPort": 6379
+}

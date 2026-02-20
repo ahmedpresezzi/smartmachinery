@@ -45,7 +45,7 @@ AUDIT_FILE = os.path.join(BASE_DIR, 'audit.json')
 ASSETS_FILE = os.path.join(BASE_DIR, 'assets.json')
 STATE_FILE = os.path.join(BASE_DIR, 'bot_state.json')
 ROOT_DIR = os.path.dirname(BASE_DIR)
-FRONTEND_DIR = ROOT_DIR # Frontend files are back in the root for GitHub Pages compatibility
+FRONTEND_DIR = os.path.join(ROOT_DIR, 'obfuscated') # Frontend files are served from the obfuscated folder
 UPLOADS_DIR = os.path.join(BASE_DIR, 'uploads')
 
 if not os.path.exists(UPLOADS_DIR):

@@ -1,0 +1,36 @@
+{
+    "manufacturer": "presezzi",
+    "model": "model",
+    "description": "",
+    "driverModule": "eth-ip",
+    "paramProfile": [
+        {
+            "paramId": "Machine_Mode",
+            "tagId": "M260_ProcessData.MachineMode"
+        },
+        {
+            "paramId": "MachineStatus_8",
+            "tagId": "M260_ProcessData.MachineStatus.8"
+        },
+        {
+            "paramId": "MachineStatus_9",
+            "tagId": "M260_ProcessData.MachineStatus.9"
+        },
+        {
+            "paramId": "MachineStatus_10",
+            "tagId": "nan"
+        },
+        {
+            "paramId": "MachineStatus_11",
+            "tagId": "nan"
+        },
+        {
+            "paramId": "MachineStatus_12",
+            "tagId": "M260_ProcessData.MachineStatus.12"
+        },
+        {
+            "paramId": "MachineStatus_13",
+            "tagId": "M260_ProcessData.MachineStatus.13"
+        }
+    ]
+}

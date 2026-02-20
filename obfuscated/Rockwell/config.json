@@ -1,0 +1,24 @@
+{
+    "configId": "presezzi",
+    "lastModDate": "21-11-2024T00:00:00Z",
+    "redisHost": "redis",
+    "redisPort": 6379,
+    "devices": [
+        {
+            "deletable": true,
+            "driverConfig": {
+                "host": "IP PLC"
+            },
+            "id": "factoryedge-rockwell(NUMERO)_profile",
+            "name": "plc-NOME MACCHINA-FREQUENZA DI CAMPIONAMENTO",
+            "pollingTime": "FREQUENZA DI CAMPIONAMENTO",
+            "profileId": "profile",
+            "protocolName": "ethernetIp",
+            "redisIndex": 0,
+            "wdtEnabled": true,
+            "wdtLimit": 10000
+        }
+    ],
+    "publishers": [],
+    "factoryEdgeId": "factoryedge-rockwell(NUMERO)"
+}
