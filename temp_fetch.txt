@@ -1,0 +1,88 @@
+Line 136: const response = await fetch(`${BACKEND_BASE}/api/verify`, {
+   headers: getAuthHeaders()
+   });
+   
+Line 201: const response = await fetch(`${BACKEND_BASE}/api/admin/users?t=${Date.now()}`, {
+   headers: getAuthHeaders()
+   });
+   if (response.status === 401 || response.status === 403) {
+Line 234: const res = await fetch(`${BACKEND_BASE}/api/admin/requests`, {
+   headers: getAuthHeaders()
+   });
+   if (!res.ok) return;
+Line 272: const res = await fetch(`${BACKEND_BASE}/api/admin/create-user`, {
+   method: 'POST',
+   headers: getAuthHeaders(),
+   body: JSON.stringify({ username: u, password: p, role: r })
+Line 350: const res = await fetch(`${BACKEND_BASE}/api/admin/update-user`, {
+   method: 'POST',
+   headers: getAuthHeaders(),
+   body: JSON.stringify({ username, role: newRole })
+Line 369: const res = await fetch(`${BACKEND_BASE}/api/admin/update-user`, {
+   method: 'POST',
+   headers: getAuthHeaders(),
+   body: JSON.stringify({ username, status: newStatus })
+Line 386: const res = await fetch(`${BACKEND_BASE}/api/admin/delete-user`, {
+   method: 'POST',
+   headers: getAuthHeaders(),
+   body: JSON.stringify({ username })
+Line 406: const response = await fetch(`${BACKEND_BASE}/api/get-excels`, {
+   headers: getAuthHeaders()
+   });
+   const fileNames = await response.json();
+Line 432: const fileRes = await fetch(`${BACKEND_BASE}/api/excel/${fileName}`, {
+   headers: getAuthHeaders()
+   });
+   const blob = await fileRes.blob();
+Line 466: const response = await fetch(`${BACKEND_BASE}/logs`, {
+   headers: getAuthHeaders()
+   });
+   if (!response.ok) return;
+Line 519: const response = await fetch(`${BACKEND_BASE}/login`, {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({ username, password })
+Line 2662: const response = await fetch(`${BACKEND_BASE}/api/get-assets`, {
+   headers: getAuthHeaders()
+   });
+   const data = await response.json();
+Line 2677: await fetch(`${BACKEND_BASE}/api/save-assets`, {
+   method: 'POST',
+   headers: getAuthHeaders(),
+   body: JSON.stringify(boxes)
+Line 3849: fetch(`${BACKEND_BASE}/api/upload-excel`, {
+   method: 'POST',
+   headers: headers,
+   body: formData
+Line 4426: const response = await fetch(`${BACKEND_BASE}/api/delete-excel`, {
+   method: 'POST',
+   headers: {
+   'Content-Type': 'application/json',
+Line 6199: const listResp = await fetch(listUrl);
+   if (!listResp.ok) {
+   console.error("Failed to list models:", listResp.status);
+   return;
+Line 6238: const response = await fetch(url, {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify(payload)
+Line 6326: const response = await fetch(BACKEND_API_URL, {
+   method: 'POST',
+   headers: getAuthHeaders(),
+   body: JSON.stringify(payload)
+Line 6505: const response = await fetch(url, {
+   method: 'POST',
+   headers: {
+   'Content-Type': 'application/json'
+Line 7120: const res = await fetch(`${BACKEND_BASE}/api/request-perms`, {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({ username: currentUsername, duration, reason })
+Line 7146: const res = await fetch(`${BACKEND_BASE}/api/check-status?username=${currentUsername}`);
+   const data = await res.json();
+   
+   if (data.status === 'accepted') {
+Line 7219: const res = await fetch(`${BACKEND_BASE}/api/admin/handle-request`, {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({ username, action })
