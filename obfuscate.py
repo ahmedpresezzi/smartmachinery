@@ -35,6 +35,9 @@ def setup_src():
                 print(f"Moved {f} to {SRC_DIR}")
 
 def build():
+    import time
+    import re
+    ts = int(time.time())
     print("--- Starting Build & Obfuscation ---")
     
     # 1. Prepare OUT_DIR
@@ -107,7 +110,7 @@ def build():
             # Replace CSS links with JS script tags
             for css in CSS_FILES:
                 pattern = re.compile(rf'<link[^>]*href=["\']?{css}["\']?[^>]*>', re.IGNORECASE)
-                content = pattern.sub(f"<script src='{css}.js'></script>", content)
+                content = pattern.sub(f"<script src='{css}.js?v={ts}'></script>", content)
 
             # Extract body and remove it from main html
             body_match = re.search(r'(<body.*</body>)', content, flags=re.IGNORECASE|re.DOTALL)
@@ -116,6 +119,11 @@ def build():
             if body_match and head_match:
                 head = head_match.group(1)
                 body = body_match.group(1)
+                
+                # Update existing JS references (script.js, i18n.js, etc.) with cache-busting
+                for js in JS_FILES:
+                    body = re.sub(rf'src=["\']?{js}[^"\'\s>]*["\']?', f"src='{js}?v={ts}'", body)
+                    head = re.sub(rf'src=["\']?{js}[^"\'\s>]*["\']?', f"src='{js}?v={ts}'", head)
                 
                 # Encode body
                 b64_body = base64.b64encode(body.encode('utf-8')).decode('utf-8')
@@ -131,13 +139,13 @@ def build():
                 os.remove(temp_js)
                 
                 # Final HTML
-                new_html = f"<!DOCTYPE html><html lang='it'>{head}<script src='{body_obf_name}'></script></html>"
+                new_html = f"<!DOCTYPE html><html lang='it'>{head}<script src='{body_obf_name}?v={ts}'></script></html>"
                 with open(out_path, "w", encoding="utf-8") as f:
                     f.write(new_html)
             else:
                 with open(out_path, "w", encoding="utf-8") as f:
                     f.write(content)
-              
+                  
     # 5. Copy extra directories
     for d in COPY_DIRS:
         if os.path.exists(d):
